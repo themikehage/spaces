@@ -50,14 +50,14 @@ app.get("/api/health", (c) => c.json({ status: "ok", time: Date.now() }));
 
 app.on(["GET", "POST"], "/api/auth/**", (c) => auth.handler(c.req.raw));
 
+app.route("/api/preview", previewRouter);
+app.route("/api", filesRouter);
 app.route("/api/auth", authRouter);
 app.route("/api/sessions", sessionsRouter);
-app.route("/api", filesRouter);
 app.route("/api/models", modelsRouter);
 app.route("/api/providers", providersRouter);
 app.route("/api/skills", skillsRouter);
 app.route("/api/env", envRouter);
-app.route("/api/preview", previewRouter);
 app.route("/api/agents", agentsRouter);
 app.route("/api/teams", teamsRouter);
 app.route("/api/backup", backupRouter);
