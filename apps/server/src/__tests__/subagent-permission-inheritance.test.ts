@@ -42,8 +42,8 @@ describe("Subagent Permission Inheritance", () => {
     expect(writeVerdict).toBeDefined();
     expect(writeVerdict!.allow).toBe("ask");
 
-    // Spawn subagent should be denied inside subagent to prevent nesting loops
-    const spawnVerdict = evaluateSubagentRules("spawn_subagent", {}, rules);
+    // manage_delegations should be denied inside subagent to prevent nesting loops
+    const spawnVerdict = evaluateSubagentRules("manage_delegations", {}, rules);
     expect(spawnVerdict).toBeDefined();
     expect(spawnVerdict!.allow).toBe(false);
   });
@@ -130,9 +130,9 @@ describe("Subagent Permission Inheritance", () => {
       expect(verdict!.allow).toBe(true);
     });
 
-    it("still denies spawn_subagent (nesting prevention)", () => {
+    it("still denies manage_delegations (nesting prevention)", () => {
       const rules = buildSubagentRules(testUser, subagentSessionId, undefined, "autonomous");
-      const verdict = evaluateSubagentRules("spawn_subagent", {}, rules);
+      const verdict = evaluateSubagentRules("manage_delegations", {}, rules);
       expect(verdict).toBeDefined();
       expect(verdict!.allow).toBe(false);
     });
@@ -152,7 +152,7 @@ describe("Subagent Permission Inheritance", () => {
       sessionMetadataStore.saveSessionMetadata(testUser, parentAutoSessionId, { executionMode: "autonomous" });
       sessionMetadataStore.persistSessionTools(testUser, parentAutoSessionId, ["read", "write", "edit", "bash"]);
 
-      // Determine child's resolved subagent type simulating spawn_subagent tool logic:
+      // Determine child's resolved subagent type simulating manage_delegations tool logic:
       const parentMeta = sessionMetadataStore.getSessionMetadata(testUser, parentAutoSessionId) || {};
       const parentExecutionMode = parentMeta.executionMode;
       

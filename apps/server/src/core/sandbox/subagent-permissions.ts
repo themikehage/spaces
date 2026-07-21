@@ -23,8 +23,7 @@ export interface SubagentPermissionConfig {
 export const DEFAULT_SUBAGENT_PERMISSIONS: SubagentPermissionConfig = {
   rules: [
     // System-deny defaults to prevent dangerous operations or nesting loops by default
-    { toolName: "spawn_subagent", pattern: "*", action: "deny", source: "agent-default" },
-    { toolName: "delegate_task", pattern: "*", action: "deny", source: "agent-default" },
+    { toolName: "manage_delegations", pattern: "*", action: "deny", source: "agent-default" },
     { toolName: "manage_factory", pattern: "*", action: "deny", source: "agent-default" },
     { toolName: "manage_custom_tools", pattern: "*", action: "deny", source: "agent-default" },
     { toolName: "manage_pipelines", pattern: "*", action: "deny", source: "agent-default" },
@@ -45,8 +44,7 @@ export const DEFAULT_SUBAGENT_PERMISSIONS: SubagentPermissionConfig = {
     { toolName: "exa_search", pattern: "*", action: "deny", source: "agent-default" },
   ],
   excludedTools: [
-    "spawn_subagent",
-    "delegate_task",
+    "manage_delegations",
     "manage_factory",
     "manage_custom_tools",
     "manage_pipelines",

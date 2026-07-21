@@ -259,7 +259,7 @@ async function handleSessions(action: string, id: string | undefined, _params: a
   }
 
   if (action === "upsert") {
-    return err("Sessions are created implicitly via chat. Upsert is not supported. Use delegate_task to send a prompt to a session.");
+    return err("Sessions are created implicitly via chat. Upsert is not supported. Use manage_delegations (action: 'delegate') to send a prompt to a session.");
   }
 
   if (action === "delete") {

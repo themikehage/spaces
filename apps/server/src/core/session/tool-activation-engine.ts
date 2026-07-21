@@ -40,7 +40,7 @@ export function resolveActiveTools({
   if (resolvedAgentId === "lab-architect") {
     alwaysOnTools.push("create_experiment");
   } else {
-    alwaysOnTools.push("spawn_subagent", "delegate_task");
+    alwaysOnTools.push("manage_delegations");
   }
 
   const definedToolNames = new Set([

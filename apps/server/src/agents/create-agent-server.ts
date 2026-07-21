@@ -149,8 +149,7 @@ export async function createAgentServer(definition: AgentDefinition, username: s
     "render_chart",
     "share_file",
     "refresh_ui",
-    "spawn_subagent",
-    "delegate_task"
+    "manage_delegations"
   ];
   if (memoryEnabled) {
     activeToolNames.push("memory_store", "memory_recall", "memory_forget");
