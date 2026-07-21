@@ -9,6 +9,12 @@ import {
 import { AuthStorage, ModelRegistry } from "../../ai";
 import { registerQwenProvider } from "../providers/qwen-provider";
 import { registerOpenCodeGoProvider } from "../providers/opencode-go-provider";
+import { registerOpenAIProvider } from "../providers/openai-provider";
+import { registerGoogleProvider } from "../providers/google-provider";
+import { registerXAIProvider } from "../providers/xai-provider";
+import { registerDeepSeekProvider } from "../providers/deepseek-provider";
+import { registerGroqProvider } from "../providers/groq-provider";
+import { registerMistralProvider } from "../providers/mistral-provider";
 import { saveProviderModels } from "../providers/provider-persistence";
 import { encryptEnv, decryptEnv } from "../../lib/env-crypto";
 import { auth } from "../../auth/index";
@@ -129,6 +135,12 @@ export class UserConfigManager {
     modelRegistry.refresh();
     registerQwenProvider(modelRegistry, username);
     registerOpenCodeGoProvider(modelRegistry, username);
+    registerOpenAIProvider(modelRegistry);
+    registerGoogleProvider(modelRegistry);
+    registerXAIProvider(modelRegistry);
+    registerDeepSeekProvider(modelRegistry);
+    registerGroqProvider(modelRegistry);
+    registerMistralProvider(modelRegistry);
     modelRegistry.refresh();
 
     const ctx: UserContext = { authStorage, modelRegistry };
