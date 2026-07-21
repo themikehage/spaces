@@ -6,7 +6,7 @@ Spaces es un espacio de trabajo en la nube para coordinar proyectos asistidos po
 
 El repositorio es un monorepo con workspaces de `pnpm`:
 
-- **`apps/client`**: aplicación principal en React 19, Vite, TypeScript y Tailwind CSS v4. Incluye chat, proyectos, agentes, equipos, sesiones, delegaciones, workspace de archivos, preview, timeline, logs, plugins, skills y ajustes.
+- **`apps/client`**: aplicación principal en React 19, Vite, TypeScript y Tailwind CSS v4. Incluye un dashboard operativo que prioriza sesiones activas y proyectos recientes, además de chat, agentes, equipos, delegaciones, workspace de archivos, preview, timeline, logs, plugins, skills y ajustes.
 - **`apps/landing`**: landing de producto en React, Vite y Tailwind CSS v4, rediseñada como una sala de control editorial que explica el flujo de delegación, ejecución y aprobación entre personas y agentes.
 - **`apps/server`**: servidor Bun + Hono. Expone API REST, autenticación, WebSocket y los servicios de ejecución del producto.
 - **`packages/shared`**: contratos, esquemas Zod, tipos y utilidades compartidos entre aplicaciones.
