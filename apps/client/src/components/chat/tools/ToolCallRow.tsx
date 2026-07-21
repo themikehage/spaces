@@ -353,13 +353,7 @@ function getArgSummary(toolName: string, args: Record<string, unknown>, l: Recor
     }
     case "manage_delegations": {
       const task = (args.task as string) || "";
-      const cleanTask = task.length > 40 ? task.slice(0, 40) + "…" : task;
-      if (args.action === "spawn") {
-        const role = (args.subagentRole as string) || "";
-        return role ? `[spawn: ${role}] ${cleanTask}` : `[spawn] ${cleanTask}`;
-      } else {
-        return `[delegate to ${args.targetType || ""}:${args.targetId || ""}] ${cleanTask}`;
-      }
+      return task.length > 55 ? task.slice(0, 55) + "…" : task;
     }
     case "exa_search": {
       const q = (args.query as string) || "";
@@ -815,7 +809,7 @@ export function ToolCallRow({
     ),
   };
 
-  const getToolLabel = (name: string): string => {
+  const getToolLabel = (name: string, toolArgs?: Record<string, unknown>): string => {
     switch (name) {
       case "request_approval": return l.labelApproval;
       case "ask_question": return l.labelQuestion;
@@ -825,7 +819,7 @@ export function ToolCallRow({
       case "refresh_ui": return l.labelRefresh;
       case "spawn_subagent": return l.labelSubagent;
       case "delegate_task": return l.labelDelegation;
-      case "manage_delegations": return l.labelDelegation;
+      case "manage_delegations": return toolArgs?.action === "spawn" ? "subagente" : l.labelDelegation;
       case "exa_search": return l.labelExaSearch;
       case "web_fetch": return l.labelWebFetch;
       case "memory_recall":
@@ -836,7 +830,7 @@ export function ToolCallRow({
     }
   };
 
-  const labelText = meta.label === toolName ? getToolLabel(toolName) : meta.label;
+  const labelText = meta.label === toolName ? getToolLabel(toolName, args) : meta.label;
 
   const running = result === null;
   const activeResult = result || (partialResult ? {
@@ -887,18 +881,15 @@ export function ToolCallRow({
           <>
             {args.action === "spawn" ? (
               <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
-                {`spawn:${args.subagentType || "builder"}`}
+                {String(args.subagentRole || args.subagentType || "builder")}
               </span>
             ) : (
               <>
-                <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
-                  {`delegate:${args.targetType || ""}`}
-                </span>
                 <span className="text-[10px]">
-                  <ArrowRight className="w-2 h-2" />
+                  <ArrowRight className="w-2.5 h-2.5 text-text-secondary" />
                 </span>
                 <span className="text-[10px] font-bold tracking-wider text-primary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
-                  {String(args.targetId)}
+                  {String(args.targetId || args.targetType || "")}
                 </span>
               </>
             )}
