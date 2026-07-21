@@ -23,3 +23,6 @@ bun.lockb
 Thumbs.db
 nul
 **/nul
+
+# Agent tools local state
+.atl/

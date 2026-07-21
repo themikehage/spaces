@@ -1,4 +1,6 @@
-# AGENTS.md - Scaffold Project
+# AGENTS.md - Spaces
+
+Un espacio de trabajo en la nube para manejar todos tus proyectos con el poder de los agentes de IA
 
 ## Mandatory Context Files
 Before any work, read: `about.md`, `steps.md`, `AGENTS.md` (this file). These are the single source of truth.
