@@ -214,6 +214,10 @@ export class ModelRegistry {
     return list;
   }
 
+  getProviders(): Map<string, ProviderConfig> {
+    return this.providers;
+  }
+
   find(provider: string, modelId: string): AvailableModel | undefined {
     return this.available.find(
       (m) => m.provider === provider && m.id === modelId

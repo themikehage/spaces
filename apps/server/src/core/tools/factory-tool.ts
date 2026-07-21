@@ -311,20 +311,18 @@ async function handleProviders(action: string, id: string | undefined, params: a
         entity: "providers", id, data: { configured: status.configured, source: status.source, models },
       });
     }
-    const allModels = modelRegistry.getAll();
-    const providers = new Map<string, any>();
-    for (const m of allModels) {
-      if (!providers.has(m.provider)) {
-        const status = authStorage.getAuthStatus(m.provider);
-        providers.set(m.provider, {
-          id: m.provider,
-          name: modelRegistry.getProviderDisplayName(m.provider),
-          configured: status.configured,
-          source: status.source,
-        });
-      }
+    const providersMap = modelRegistry.getProviders();
+    const providers = [];
+    for (const [providerId, config] of providersMap.entries()) {
+      const status = authStorage.getAuthStatus(providerId);
+      providers.push({
+        id: providerId,
+        name: config.name,
+        configured: status.configured,
+        source: status.source,
+      });
     }
-    return ok(JSON.stringify([...providers.values()], null, 2), { entity: "providers", data: [...providers.values()] });
+    return ok(JSON.stringify(providers, null, 2), { entity: "providers", data: providers });
   }
 
   if (action === "upsert") {

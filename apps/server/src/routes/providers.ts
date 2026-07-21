@@ -22,34 +22,30 @@ providersRouter.get("/", (c) => {
   const { authStorage, modelRegistry } =
     sessionManager.userConfig.getUserContext(username);
 
-  const models = modelRegistry.getAll();
+  const providers = modelRegistry.getProviders();
   const providersMap = new Map<
     string,
     {
       name: string;
       authStatus: ReturnType<typeof buildAuthStatus>;
-      models: Array<{ id: string; name: string; reasoning: boolean; input?: string[] }>;
+      models: Array<{ id: string; name: string; reasoning: boolean; input?: string[]; contextWindow?: number; maxTokens?: number; cost?: Record<string, number> }>;
     }
   >();
 
-  for (const model of models) {
-    const provider = model.provider as string;
-    if (!providersMap.has(provider)) {
-      providersMap.set(provider, {
-        name: modelRegistry.getProviderDisplayName(provider),
-        authStatus: buildAuthStatus(authStorage, provider),
-        models: [],
-      });
-    }
-    providersMap.get(provider)!.models.push({
-      id: model.id,
-      name: model.name,
-      reasoning: model.reasoning,
-      input: model.input || ["text"],
-      contextWindow: model.contextWindow,
-      maxTokens: model.maxTokens,
-      cost: model.cost,
-    } as any);
+  for (const [id, config] of providers.entries()) {
+    providersMap.set(id, {
+      name: config.name,
+      authStatus: buildAuthStatus(authStorage, id),
+      models: config.models.map((model) => ({
+        id: model.id,
+        name: model.name,
+        reasoning: !!model.reasoning,
+        input: model.input || ["text"],
+        contextWindow: model.contextWindow,
+        maxTokens: model.maxTokens,
+        cost: model.cost,
+      })),
+    });
   }
 
   return c.json({

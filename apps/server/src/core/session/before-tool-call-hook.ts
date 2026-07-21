@@ -20,9 +20,18 @@ export function createBeforeToolCallHook({ sessionId, isSubagent, parentSessionI
 
     const resolvedUsername = username || "default_user";
 
-    // Read from session metadata first, fall back to parameter
+    const resolvedAutonomy = (sessionMetadataStore.getSessionMetadata(resolvedUsername, sessionId)?.autonomyLevel as any)
+      ?? "auto";
+
     const resolvedMode = (sessionMetadataStore.getSessionMetadata(resolvedUsername, sessionId)?.executionMode as any)
       ?? executionMode;
+
+    if (resolvedAutonomy === "suggest") {
+      const harmlessTools = ["ask_question", "request_approval"];
+      if (!harmlessTools.includes(toolName)) {
+        return { block: true, reason: `[Autonomy: Suggest Mode] Tool execution blocked. Suggested action: ${toolName} with arguments ${JSON.stringify(args)}` };
+      }
+    }
 
     const verdict = permissionEngine.evaluate(toolName, args as Record<string, unknown>, {
       isSubagent: resolvedIsSubagent,
@@ -35,7 +44,10 @@ export function createBeforeToolCallHook({ sessionId, isSubagent, parentSessionI
       return { block: true, reason: `[Permission Denied] ${verdict.reason}` };
     }
 
-    if (verdict.allow === "ask") {
+    const harmlessTools = ["ask_question", "request_approval", "memory_recall"];
+    const needsApproval = verdict.allow === "ask" || (resolvedAutonomy === "propose" && !harmlessTools.includes(toolName));
+
+    if (needsApproval) {
       const toolCallId = toolCall.id;
       const approvalPromise = approvalManager.request({
         username: resolvedUsername,
@@ -44,7 +56,7 @@ export function createBeforeToolCallHook({ sessionId, isSubagent, parentSessionI
         toolCallId,
         toolName,
         args: args as Record<string, unknown>,
-        reason: verdict.reason,
+        reason: verdict.reason || "Enforced by Propose autonomy level",
       });
 
       const onAbort = () => {
