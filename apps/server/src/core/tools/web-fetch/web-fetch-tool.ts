@@ -220,7 +220,7 @@ async function safeFetchWithRedirects(
         method: "GET",
         redirect: "manual",
         headers: {
-          "User-Agent": "CrewFactoryWebFetch/1.0 (Security-Validated Bot)",
+          "User-Agent": "SpacesWebFetch/1.0 (Security-Validated Bot)",
           "Accept": "text/html, text/plain, application/xhtml+xml, application/xml;q=0.9, */*;q=0.8",
         },
         signal: controller.signal,

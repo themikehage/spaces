@@ -17,7 +17,6 @@ import { useSessionActions } from "./hooks/useSessionActions";
 import { Breadcrumbs } from "./header/Breadcrumbs";
 import { DesktopHeader } from "./header/DesktopHeader";
 import { ContextTabBar } from "./tabs/ContextTabBar";
-import { LabActionsToolbar } from "./tabs/LabActionsToolbar";
 import { DesktopSidebar } from "./sidebar/DesktopSidebar";
 import { MobileSidebarOverlay } from "./sidebar/MobileSidebarOverlay";
 import { MobileBottomBar } from "./mobile/MobileBottomBar";
@@ -30,26 +29,6 @@ import { ProjectSettingsModal } from "@/components/projects/ProjectSettingsModal
 import { TeamSettingsModal } from "@/components/teams/TeamSettingsModal";
 import { GlobalAgentSettingsModal } from "@/components/agents/GlobalAgentSettingsModal";
 
-type VariantTab = "chat" | "config" | "single" | "multiNoLeader" | "multiWithLeader" | "compare";
-
-interface LabProps {
-  selectedExpId?: string | null;
-  experiments?: any[];
-  onDeleteExperiment?: (id: string) => void;
-  activeVariantTab?: VariantTab;
-  setActiveVariantTab?: (tab: VariantTab) => void;
-  onRunExperiment?: (id: string) => void;
-  onStopExperiment?: (id: string) => void;
-  onEditExperiment?: (id: string) => void;
-  onJudgeExperiment?: (id: string) => void;
-  onExportExperiment?: (id: string) => void;
-  selectedRunId?: string;
-  pastRuns?: any[];
-  runPopoverOpen?: boolean;
-  setRunPopoverOpen?: (open: boolean) => void;
-  onSelectRun?: (runId: string) => void;
-}
-
 interface Props {
   page: RoutePage;
   onNavigate: (path: string) => void;
@@ -57,7 +36,6 @@ interface Props {
   isMobile?: boolean;
   canGoBack?: boolean;
   onBack?: () => void;
-  lab?: LabProps;
 }
 
 export function MainLayout({
@@ -67,7 +45,6 @@ export function MainLayout({
   isMobile = false,
   canGoBack = false,
   onBack,
-  lab,
 }: Props) {
   const workspace = useWorkspaceContext();
   const {
@@ -79,9 +56,7 @@ export function MainLayout({
     selectTeam: onSelectTeam,
   } = workspace;
 
-  const activeAgent = (page === "laboratory" && !lab?.selectedExpId)
-    ? { id: "lab-architect", name: "Lab Architect" }
-    : rawActiveAgent;
+  const activeAgent = rawActiveAgent;
 
   const l = useLiterals(u);
   const { pathname } = useLocation();
@@ -369,7 +344,6 @@ export function MainLayout({
     if (activeProjectId) return activeProjectName || activeProjectId;
     if (activeAgent) return activeAgent.name;
     if (activeTeam) return `#${activeTeam.name}`;
-    if (page === "laboratory") return "Laboratorio";
     if (page === "settings") return l.breadSettings || "Settings";
     if (page === "skills") return l.breadSkills || "Skills";
     if (page === "logs") return l.breadLogs || "Logs";
@@ -409,8 +383,8 @@ export function MainLayout({
     children
   );
 
-  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "laboratory" || page === "org" || page === "delegations" || page === "timeline";
-  const showNewSessionButton = !isHome && isContextView && page !== "laboratory";
+  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "org" || page === "delegations" || page === "timeline";
+  const showNewSessionButton = !isHome && isContextView;
 
   const isNegotiationTeam = activeTeamData?.teamType === "Negotiation";
 
@@ -508,8 +482,6 @@ export function MainLayout({
       activeProjectName={activeProjectName}
       activeAgent={activeAgent}
       activeTeam={activeTeam}
-      selectedExpId={lab?.selectedExpId}
-      experiments={lab?.experiments}
       onNavigate={onNavigate}
       l={l}
       factoryName={globalSettings?.factoryName}
@@ -518,23 +490,6 @@ export function MainLayout({
 
   const rightToolbarElement = (
     <>
-      {page === "laboratory" && lab?.selectedExpId ? (
-        <LabActionsToolbar
-          selectedExpId={lab.selectedExpId}
-          experiments={lab.experiments || []}
-          selectedRunId={lab.selectedRunId}
-          pastRuns={lab.pastRuns}
-          runPopoverOpen={lab.runPopoverOpen}
-          setRunPopoverOpen={lab.setRunPopoverOpen}
-          onSelectRun={lab.onSelectRun}
-          onRunExperiment={lab.onRunExperiment}
-          onStopExperiment={lab.onStopExperiment}
-          onEditExperiment={lab.onEditExperiment}
-          onDeleteExperiment={lab.onDeleteExperiment}
-          onJudgeExperiment={lab.onJudgeExperiment}
-          onExportExperiment={lab.onExportExperiment}
-        />
-      ) : (
         <>
           {!isMobile && (
             <button
@@ -648,7 +603,6 @@ export function MainLayout({
             </button>
           )}
         </>
-      )}
     </>
   );
 
@@ -656,10 +610,6 @@ export function MainLayout({
     <ContextTabBar
       page={page}
       contextTabs={contextTabs}
-      selectedExpId={lab?.selectedExpId}
-      experiments={lab?.experiments}
-      activeVariantTab={lab?.activeVariantTab}
-      onChangeVariantTab={lab?.setActiveVariantTab}
       onNavigateTab={onNavigate}
       rightSlot={rightToolbarElement}
     />
@@ -669,7 +619,6 @@ export function MainLayout({
     <SessionSidebar
       currentPage={page}
       onNavigate={onNavigate}
-      selectedExpId={lab?.selectedExpId}
       isMobile={isMobile}
       onCloseSidebar={() => setSidebarOpen(false)}
     />

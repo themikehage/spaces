@@ -1,6 +1,6 @@
 /**
  * Compatibility entrypoint — vendored, stripped to OpenAI-compatible providers only.
- * Replaces the vendored ai compat module for CrewFactory.
+ * Replaces the vendored ai compat module for Spaces.
  */
 
 import { openAICompletionsApi } from "./api/openai-completions.lazy.ts";

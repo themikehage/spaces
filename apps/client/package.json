@@ -9,19 +9,32 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "lucide-react": "^0.468.0",
-    "shared": "workspace:*"
+    "@xyflow/react": "^12.11.2",
+    "better-auth": "^1.6.23",
+    "clsx": "^2",
+    "framer-motion": "^11",
+    "lucide-react": "^1.23.0",
+    "react": "^19",
+    "react-dom": "^19",
+    "react-markdown": "^10",
+    "react-router-dom": "^7.18.1",
+    "react-syntax-highlighter": "^15",
+    "recharts": "^2.12.7",
+    "remark-gfm": "^4.0.1",
+    "shared": "workspace:*",
+    "sharp": "^0.35.2",
+    "vite-plugin-pwa": "^1.3.0"
   },
   "devDependencies": {
-    "@tailwindcss/vite": "^4.0.0",
-    "@types/node": "^22.10.2",
-    "@types/react": "^19.0.2",
-    "@types/react-dom": "^19.0.2",
-    "@vitejs/plugin-react": "^4.3.4",
-    "tailwindcss": "^4.0.0",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.5"
+    "@tailwindcss/postcss": "^4",
+    "@tailwindcss/vite": "^4",
+    "@types/node": "^24",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "@types/react-syntax-highlighter": "^15",
+    "@vitejs/plugin-react": "^4",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^6"
   }
 }

@@ -6,8 +6,6 @@ interface BreadcrumbsProps {
   activeProjectName: string | null;
   activeAgent: { id: string; name: string } | null;
   activeTeam?: { id: string; name: string } | null;
-  selectedExpId?: string | null;
-  experiments?: any[];
   onNavigate: (path: string) => void;
   l: Record<string, string>;
   factoryName?: string;
@@ -19,8 +17,6 @@ export function Breadcrumbs({
   activeProjectName,
   activeAgent,
   activeTeam = null,
-  selectedExpId,
-  experiments = [],
   onNavigate,
   l,
   factoryName = "Factory",
@@ -80,12 +76,6 @@ export function Breadcrumbs({
     items = [{ label: l.breadSessions || "Sessions" }];
   } else if (page === "analytics") {
     items = [{ label: l.breadAnalytics || "Analytics" }];
-  } else if (page === "laboratory") {
-    items = [{ label: "Laboratorio", path: "/laboratory" }];
-    if (selectedExpId) {
-      const activeExp = experiments.find((e: any) => e.id === selectedExpId);
-      items.push({ label: activeExp?.name || "Experimento" });
-    }
   }
 
   return (

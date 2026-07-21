@@ -31,7 +31,7 @@ interface Props {
   };
 }
 
-// Colores por defecto elegantes compatibles con el tema oscuro/oklch de CrewFactory
+// Colores por defecto elegantes compatibles con el tema oscuro/oklch de Spaces
 const DEFAULT_COLORS = [
   "#4ade80", // accent (green)
   "#60a5fa", // primary (blue)

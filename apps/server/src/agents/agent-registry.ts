@@ -1,5 +1,5 @@
 import { createAgentServer } from "./create-agent-server";
-import { type AgentDefinition, type AgentInfo, type AgentStatus, SessionPrefix, getUserDir, CREWFACTORY_DATA_PATH, USERS_DIR, type AgentScopeTarget } from "shared";
+import { type AgentDefinition, type AgentInfo, type AgentStatus, SessionPrefix, getUserDir, SPACES_DATA_PATH, USERS_DIR, type AgentScopeTarget } from "shared";
 import type { AgentEntry } from "./types";
 import { scopeConfigManager } from "../core/scope";
 import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
@@ -25,7 +25,7 @@ class AgentRegistry {
   }
 
   async init(): Promise<void> {
-    const usersParentDir = join(CREWFACTORY_DATA_PATH(), USERS_DIR);
+    const usersParentDir = join(SPACES_DATA_PATH(), USERS_DIR);
     if (!existsSync(usersParentDir)) return;
     try {
       const userDirs = readdirSync(usersParentDir, { withFileTypes: true });

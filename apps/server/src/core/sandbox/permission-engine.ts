@@ -74,7 +74,7 @@ const ASK_RULES: PermissionRule[] = [
     allow: "ask",
     reason: "Recursive directory deletion requires explicit user confirmation."
   },
-  // Escritura o modificación fuera de paths temporales o del workspace de crewfactory
+  // Escritura o modificación fuera de paths temporales o del workspace de spaces
   {
     tool: "write",
     pattern: /^(?!\/tmp|C:\\Users\\[^\\]+\\AppData\\Local\\Temp|.*[\\/]workspace[\\/]|.*[\\/]projects[\\/]).*$/i,
@@ -99,7 +99,7 @@ const ASK_RULES: PermissionRule[] = [
 const SUBAGENT_DENY_RULES: PermissionRule[] = [
   {
     tool: "bash",
-    pattern: /\brm\s+-[rRfF]{1,4}\s+(\/(etc|var|usr|home|tmp\/crewfactory))/,
+    pattern: /\brm\s+-[rRfF]{1,4}\s+(\/(etc|var|usr|home|tmp\/spaces))/,
     allow: false,
     reason: "Subagent: deletion of critical system or workspace root directories is blocked."
   },

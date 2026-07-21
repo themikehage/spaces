@@ -24,7 +24,7 @@ export function createManagePipelinesTool(opts: FactoryToolOptions) {
 
   return {
     name: "manage_pipelines",
-    description: `Manage CrewFactory deterministic linear execution pipelines.
+    description: `Manage Spaces deterministic linear execution pipelines.
 Allows listing pipelines, creating/updating definitions, running executions, aborting them, viewing logs/raw outputs, and reading/patching execution scripts.
 
 Actions:

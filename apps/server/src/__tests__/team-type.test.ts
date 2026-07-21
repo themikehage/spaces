@@ -27,20 +27,6 @@ describe("Team Type - Schema and Store Tests", () => {
     rmSync(TMP_TEST_DIR, { recursive: true, force: true });
   });
 
-  test("createTeam persists teamType: Negotiation", () => {
-    const created = teamStore.createTeam(username, {
-      name: "Negotiation Team",
-      teamType: "Negotiation",
-      members: [{ agentId: "agent1", role: "lead" }],
-    });
-
-    expect(created.teamType).toBe("Negotiation");
-
-    const fetched = teamStore.getTeam(username, created.id);
-    expect(fetched).not.toBeNull();
-    expect(fetched!.teamType).toBe("Negotiation");
-  });
-
   test("createTeam persists teamType: Orchestration", () => {
     const created = teamStore.createTeam(username, {
       name: "Orchestration Team",
@@ -55,7 +41,7 @@ describe("Team Type - Schema and Store Tests", () => {
     expect(fetched!.teamType).toBe("Orchestration");
   });
 
-  test("getTeam applies fallback to Negotiation for legacy teams without teamType", () => {
+  test("getTeam applies fallback to Orchestration for legacy teams without teamType", () => {
     const created = teamStore.createTeam(username, {
       name: "Legacy Team",
       members: [{ agentId: "agent1", role: "lead" }],
@@ -78,13 +64,13 @@ describe("Team Type - Schema and Store Tests", () => {
 
     const fetched = teamStore.getTeam(username, created.id);
     expect(fetched).not.toBeNull();
-    expect(fetched!.teamType).toBe("Negotiation");
+    expect(fetched!.teamType).toBe("Orchestration");
   });
 
   test("teamType is rejected by the update schema and store", () => {
     const created = teamStore.createTeam(username, {
       name: "Swap Type Team",
-      teamType: "Negotiation",
+      teamType: "Orchestration",
       members: [{ agentId: "agent1", role: "lead" }],
     });
 
@@ -98,19 +84,19 @@ describe("Team Type - Schema and Store Tests", () => {
     )).toThrow("immutable");
 
     const fetched = teamStore.getTeam(username, created.id);
-    expect(fetched!.teamType).toBe("Negotiation");
+    expect(fetched!.teamType).toBe("Orchestration");
   });
 
   test("listTeams includes teamType in results", () => {
     const u = `test_user_list_${Date.now()}`;
     teamStore.createTeam(u, {
-      name: "Neg Team",
-      teamType: "Negotiation",
+      name: "Orch Team 1",
+      teamType: "Orchestration",
       members: [{ agentId: "agent1", role: "lead" }],
     });
 
     teamStore.createTeam(u, {
-      name: "Orch Team",
+      name: "Orch Team 2",
       teamType: "Orchestration",
       members: [{ agentId: "agent2", role: "lead" }],
     });
@@ -120,7 +106,6 @@ describe("Team Type - Schema and Store Tests", () => {
     expect(teams.every((t) => t.teamType !== undefined)).toBe(true);
 
     const types = teams.map((t) => t.teamType).sort();
-    expect(types).toContain("Negotiation");
     expect(types).toContain("Orchestration");
   });
 });

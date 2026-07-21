@@ -39,12 +39,8 @@ export function TeamCard({ team, registeredAgents, onOpen }: Props) {
           <div className="min-w-0 flex flex-col gap-0.5">
             <div className="flex items-center gap-1.5 min-w-0">
               <h3 className="font-medium text-foreground text-sm truncate">{team.name}</h3>
-              <span className={`px-1.5 py-0.5 text-[9px] font-semibold rounded-full flex-shrink-0 ${
-                team.teamType === "Orchestration"
-                  ? "bg-accent/15 text-accent border border-accent/25"
-                  : "bg-primary/15 text-primary border border-primary/25"
-              }`}>
-                {team.teamType || "Negotiation"}
+              <span className="px-1.5 py-0.5 text-[9px] font-semibold rounded-full flex-shrink-0 bg-accent/15 text-accent border border-accent/25">
+                {team.teamType || "Orchestration"}
               </span>
             </div>
             {team.description && (

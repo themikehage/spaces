@@ -31,10 +31,10 @@ describe("Subagent PermissionEngine", () => {
     expect(resultSys.block).toBe(true);
     expect(resultSys.reason).toContain("Recursive deletion of critical system directories");
 
-    // Debería bloquear rm -rf /tmp/crewfactory (regla específica de subagente)
+    // Debería bloquear rm -rf /tmp/spaces (regla específica de subagente)
     const contextSub = {
       toolCall: { name: "bash", id: "call_1_sub" },
-      args: { command: "rm -rf /tmp/crewfactory" }
+      args: { command: "rm -rf /tmp/spaces" }
     };
     const resultSub = await hook(contextSub);
     expect(resultSub).toBeDefined();

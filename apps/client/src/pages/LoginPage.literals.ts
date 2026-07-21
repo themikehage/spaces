@@ -2,7 +2,7 @@ import type { LiteralsRecord } from "@/lib";
 
 export const literals = {
   en: {
-    title: "Crew Factory",
+    title: "Spaces",
     subtitle: "Coding agent interface",
     usernamePlaceholder: "Username",
     passwordPlaceholder: "Password",
@@ -11,7 +11,7 @@ export const literals = {
     loginFailed: "Login failed",
   },
   es: {
-    title: "Crew Factory",
+    title: "Spaces",
     subtitle: "Interfaz de agente de codificacion",
     usernamePlaceholder: "Usuario",
     passwordPlaceholder: "Contrasena",

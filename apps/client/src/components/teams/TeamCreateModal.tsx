@@ -25,7 +25,7 @@ export function TeamCreateModal({
   const l = useLiterals(u);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
-  const [teamType, setTeamType] = useState<"Negotiation" | "Orchestration">("Negotiation");
+  const teamType = "Orchestration";
   const [leaderAgentId, setLeaderAgentId] = useState("");
   const [selectedMemberIds, setSelectedMemberIds] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -170,33 +170,7 @@ export function TeamCreateModal({
             />
           </div>
 
-          <div>
-            <label className="text-xs font-medium text-muted-foreground block mb-2">{l.teamTypeLabel}</label>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                type="button"
-                onClick={() => setTeamType("Negotiation")}
-                className={`flex flex-col items-center justify-center p-2 rounded-lg border text-xs cursor-pointer font-semibold transition-all ${
-                  teamType === "Negotiation"
-                    ? "border-primary bg-primary/5 text-foreground"
-                    : "border-input bg-background text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Negotiation
-              </button>
-              <button
-                type="button"
-                onClick={() => setTeamType("Orchestration")}
-                className={`flex flex-col items-center justify-center p-2 rounded-lg border text-xs cursor-pointer font-semibold transition-all ${
-                  teamType === "Orchestration"
-                    ? "border-primary bg-primary/5 text-foreground"
-                    : "border-input bg-background text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                Orchestration
-              </button>
-            </div>
-          </div>
+
 
           <div>
             <label className="text-xs font-medium text-muted-foreground block mb-1">{l.leaderLabel}</label>

@@ -1,7 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { apiFetch } from "@/lib/api";
 import { useWorkspaceContext } from "@/hooks/useWorkspaceContext";
-import { useExperiments } from "@/hooks/useExperiments";
 import { useLiterals } from "@/lib";
 import { literals as u } from "./SessionSidebar.literals";
 import { AgentAvatar } from "@/components/shared/AgentAvatar";
@@ -32,7 +31,6 @@ interface AgentItem {
 interface Props {
   currentPage?: string;
   onNavigate?: (path: string) => void;
-  selectedExpId?: string | null;
   isMobile?: boolean;
   onCloseSidebar?: () => void;
 }
@@ -40,7 +38,6 @@ interface Props {
 export function SessionSidebar({
   currentPage = "chat",
   onNavigate,
-  selectedExpId = null,
   isMobile = false,
   onCloseSidebar,
 }: Props) {
@@ -58,8 +55,6 @@ export function SessionSidebar({
   const [repos, setRepos] = useState<RepoItem[]>([]);
   const [agents, setAgents] = useState<AgentItem[]>([]);
   const [teams, setTeams] = useState<any[]>([]);
-  const { experiments, loading: loadingExperiments } = useExperiments();
-
   const [loadingRepos, setLoadingRepos] = useState(true);
   const [loadingAgents, setLoadingAgents] = useState(true);
   const [loadingTeams, setLoadingTeams] = useState(true);
@@ -68,7 +63,6 @@ export function SessionSidebar({
   const [isOpenRepos, setIsOpenRepos] = useState(true);
   const [isOpenAgents, setIsOpenAgents] = useState(true);
   const [isOpenTeams, setIsOpenTeams] = useState(true);
-  const [isOpenExperiments, setIsOpenExperiments] = useState(true);
 
   const fetchRepos = useCallback(async () => {
     try {
@@ -201,13 +195,7 @@ export function SessionSidebar({
     return () => window.removeEventListener("entity-updated", handleUpdate);
   }, [fetchRepos, fetchAgents, fetchTeams, fetchGlobalSettings]);
 
-  const handleSelectExperimentClick = useCallback(
-    (expId: string) => {
-      onCloseSidebar?.();
-      if (onNavigate) onNavigate(`/laboratory/${expId}`);
-    },
-    [onNavigate, onCloseSidebar]
-  );
+
 
   const handleGoFactory = useCallback(() => {
     if (onSelectProject) onSelectProject(null, null);
@@ -240,7 +228,6 @@ export function SessionSidebar({
     },
     [onSelectTeam, onCloseSidebar]
   );
-
   const adminItems = useMemo(
     () => [
       {
@@ -280,22 +267,8 @@ export function SessionSidebar({
           </svg>
         ),
       },
-      {
-        id: "pipelines",
-        label: l.navPipelines || "Pipelines",
-        path: "/pipelines",
-        icon: (
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="3" width="18" height="18" rx="2" />
-            <path d="M7 8h10" />
-            <path d="M7 12h10" />
-            <path d="M7 16h10" />
-          </svg>
-        ),
-      },
-
     ],
-    [l.navSkills, l.navSettings, l.navPlugins, l.navPipelines]
+    [l.navSkills, l.navSettings, l.navPlugins]
   );
 
   return (
@@ -511,73 +484,6 @@ export function SessionSidebar({
                         className="flex-shrink-0"
                       />
                       <span className="truncate">{team.name}</span>
-                    </button>
-                  );
-                })
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Experiments Accordion */}
-        <div className="flex flex-col">
-          <div className={accordionHeaderClass} onClick={() => setIsOpenExperiments((prev) => !prev)}>
-            <svg
-              width={chevronSize}
-              height={chevronSize}
-              viewBox="0 0 20 20"
-              fill="currentColor"
-              className={`transform transition-transform ${isOpenExperiments ? "rotate-90" : ""}`}
-            >
-              <path
-                fillRule="evenodd"
-                d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                clipRule="evenodd"
-              />
-            </svg>
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onCloseSidebar?.();
-                onNavigate?.("/laboratory");
-              }}
-              className={`${accordionButtonClass}`}
-            >
-              <span className="ml-2">{l.sectionExperiments || "Experimentos"} ({experiments.length})</span>
-              <svg width={isMobile ? 20 : 12} height={isMobile ? 20 : 12} viewBox="0 0 20 20" fill="currentColor" className="text-muted-foreground flex-shrink-0">
-                <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
-            </button>
-          </div>
-
-          {isOpenExperiments && (
-            <div className={isMobile ? "px-3 mt-1 space-y-1.5" : "px-2 mt-1 space-y-0.5"}>
-              {loadingExperiments ? (
-                <div className="text-xs text-muted-foreground px-3 py-1 animate-pulse">{l.loading}</div>
-              ) : experiments.length === 0 ? (
-                <div className="text-xs text-muted-foreground px-3 py-1">{l.noExperiments || "Sin experimentos"}</div>
-              ) : (
-                experiments.map((exp) => {
-                  const isActive = currentPage === "laboratory" && selectedExpId === exp.id;
-                  return (
-                    <button
-                      key={exp.id}
-                      onClick={() => handleSelectExperimentClick(exp.id)}
-                      className={itemClass(isActive)}
-                    >
-                      <svg
-                        width={isMobile ? 20 : 12}
-                        height={isMobile ? 20 : 12}
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2.5"
-                        className="flex-shrink-0 text-muted-foreground"
-                      >
-                        <path d="M4.5 3h15" />
-                        <path d="M6 3v6l6 9h-3.5a1 1 0 0 0 0 2h11a1 1 0 0 0 0-2H16l-6-9V3" />
-                      </svg>
-                      <span className="truncate">{exp.name}</span>
                     </button>
                   );
                 })

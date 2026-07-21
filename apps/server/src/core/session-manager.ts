@@ -556,8 +556,8 @@ class SessionManager {
   }
 
   async autoCleanupSessions(username: string): Promise<void> {
-    const retentionDaysStr = process.env.CREWFACTORY_SESSION_RETENTION_DAYS;
-    const maxCountStr = process.env.CREWFACTORY_SESSION_MAX_COUNT;
+    const retentionDaysStr = process.env.SPACES_SESSION_RETENTION_DAYS;
+    const maxCountStr = process.env.SPACES_SESSION_MAX_COUNT;
     if (!retentionDaysStr && !maxCountStr) return;
 
     try {

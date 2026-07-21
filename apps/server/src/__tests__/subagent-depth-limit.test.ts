@@ -36,10 +36,10 @@ describe("Subagent Depth Limit System", () => {
     const config = getAppConfig();
     expect(config.subagent.maxDepth).toBe(1);
 
-    process.env.CREWFACTORY_SUBAGENT_MAX_DEPTH = "3";
+    process.env.SPACES_SUBAGENT_MAX_DEPTH = "3";
     const overridden = getAppConfig();
     expect(overridden.subagent.maxDepth).toBe(3);
 
-    delete process.env.CREWFACTORY_SUBAGENT_MAX_DEPTH;
+    delete process.env.SPACES_SUBAGENT_MAX_DEPTH;
   });
 });

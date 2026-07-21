@@ -250,7 +250,7 @@ export function GeneralTab() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `crewfactory-backup-${user?.username}-${exportType}-${new Date().toISOString().slice(0, 10)}.zip`;
+      a.download = `spaces-backup-${user?.username}-${exportType}-${new Date().toISOString().slice(0, 10)}.zip`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -689,7 +689,7 @@ export function GeneralTab() {
           </div>
           <div className="space-y-0.5">
             <div className="text-muted-foreground font-medium">{l.workspaceContext}</div>
-            <div className="text-foreground font-mono break-words">themikehage/crewfactory</div>
+            <div className="text-foreground font-mono break-words">themikehage/spaces</div>
           </div>
           <div className="space-y-0.5">
             <div className="text-muted-foreground font-medium">{l.healthStatus}</div>

@@ -1,6 +1,5 @@
 import { describe, expect, it } from "bun:test";
 import { parseEnvelope, getLastAssistantText, resolveModelWithFallback } from "../core/agent-utils";
-import { ArbitrationProtocol } from "../core/negotiation/arbitration-protocol";
 
 describe("Agent Utilities - Envelope Parser", () => {
   it("should parse a valid envelope with custom keys", () => {
@@ -50,29 +49,5 @@ describe("Agent Utilities - Last Assistant Text Extractions", () => {
     ];
     const text = getLastAssistantText(messages);
     expect(text).toBe("Procesando la tarea...");
-  });
-});
-
-
-
-describe("Arbitration Protocol Primitives", () => {
-  it("should build binding arbitration message", () => {
-    const arbitration = new ArbitrationProtocol({ arbiterAgentId: "ceo" });
-    expect(arbitration.getArbiterAgentId()).toBe("ceo");
-
-    const msg = arbitration.buildEscalationMessage({
-      senderId: "dev",
-      senderName: "Developer Agent",
-      receiverId: "pm",
-      receiverName: "Project Manager Agent",
-      rounds: 5,
-      teamId: "team-1",
-      sessionId: "session-abc",
-    });
-
-    expect(msg.role).toBe("user");
-    expect(msg.content).toContain("Bloqueo detectado tras 5 rondas");
-    expect(msg.content).toContain("@Developer Agent");
-    expect(msg.content).toContain("@Project Manager Agent");
   });
 });

@@ -52,7 +52,7 @@ export class McpClient {
       await this.request("initialize", {
         protocolVersion: "2024-11-05",
         capabilities: {},
-        clientInfo: { name: "crewfactory-mcp-client", version: "1.0.0" },
+        clientInfo: { name: "spaces-mcp-client", version: "1.0.0" },
       }, 30000);
 
       this.notify("notifications/initialized");
@@ -94,7 +94,7 @@ export class McpClient {
       await this.request("initialize", {
         protocolVersion: "2024-11-05",
         capabilities: {},
-        clientInfo: { name: "crewfactory-mcp-client", version: "1.0.0" },
+        clientInfo: { name: "spaces-mcp-client", version: "1.0.0" },
       }, 30000);
 
       this.notify("notifications/initialized");

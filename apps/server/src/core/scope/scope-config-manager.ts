@@ -4,7 +4,7 @@ import {
   type AgentScopeTarget,
   getScopeConfigPath,
   getUserDir,
-  CREWFACTORY_DATA_PATH,
+  SPACES_DATA_PATH,
   USERS_DIR
 } from "shared";
 import { type ToolScopeTarget } from "../custom-tools/schemas";
@@ -459,7 +459,7 @@ class ScopeConfigManager {
   }
 
   async init(): Promise<void> {
-    const usersParentDir = join(CREWFACTORY_DATA_PATH(), USERS_DIR);
+    const usersParentDir = join(SPACES_DATA_PATH(), USERS_DIR);
     if (!existsSync(usersParentDir)) return;
     try {
       const userDirs = readdirSync(usersParentDir, { withFileTypes: true });

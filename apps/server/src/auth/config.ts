@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { getDb } from "./db";
-import { CREWFACTORY_DATA_PATH } from "shared";
+import { SPACES_DATA_PATH } from "shared";
 import { programmaticSessionPlugin } from "./plugins/programmatic-session";
 
 export function createAuth() {
@@ -11,8 +11,8 @@ export function createAuth() {
     database: db,
     secret,
     baseURL: process.env.BETTER_AUTH_URL || 
-             (process.env.SERVICE_FQDN_CREWFACTORY_3000
-               ? `https://${process.env.SERVICE_FQDN_CREWFACTORY_3000}`
+             (process.env.SERVICE_FQDN_SPACES_3000
+               ? `https://${process.env.SERVICE_FQDN_SPACES_3000}`
                : process.env.NODE_ENV === "production"
                  ? `http://localhost:${process.env.PORT || 3000}`
                  : "http://localhost:5173"),
@@ -58,11 +58,16 @@ function getOrCreateSecret(): string {
     return process.env.BETTER_AUTH_SECRET;
   }
 
-  const { existsSync, readFileSync, writeFileSync } = require("node:fs");
+  const { existsSync, readFileSync, writeFileSync, mkdirSync } = require("node:fs");
   const { join } = require("node:path");
   const { randomBytes } = require("node:crypto");
 
-  const secretPath = join(CREWFACTORY_DATA_PATH(), ".auth-secret");
+  const dataPath = SPACES_DATA_PATH();
+  if (!existsSync(dataPath)) {
+    mkdirSync(dataPath, { recursive: true });
+  }
+
+  const secretPath = join(dataPath, ".auth-secret");
   if (existsSync(secretPath)) {
     return readFileSync(secretPath, "utf-8").trim();
   }

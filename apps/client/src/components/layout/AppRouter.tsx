@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { Outlet, useLocation, useNavigate, useParams } from "react-router-dom";
+import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { LoginPage } from "@/pages/LoginPage";
 import { OnboardingPage } from "@/pages/OnboardingPage";
@@ -8,10 +8,7 @@ import { MainLayout } from "./MainLayout";
 import { useIsMobile } from "@/hooks/useIsMobile";
 import { useNavigationStack, type NavigationStackItem } from "@/hooks/useNavigationStack";
 import { GlobalApprovalOverlay } from "@/components/approvals/GlobalApprovalOverlay";
-import { useLaboratoryController } from "@/hooks/useLaboratoryController";
 import { WorkspaceContextProvider } from "@/hooks/useWorkspaceContext";
-import { LaboratoryModals } from "@/components/laboratory/LaboratoryModals";
-import { LaboratoryProvider } from "@/router/LaboratoryContext";
 import { useRoutePage } from "@/router/useRoutePage";
 
 export function AppRouter() {
@@ -30,14 +27,10 @@ interface AppRouterContentProps {
 
 function AppRouterContent({ locationPath, navigate }: AppRouterContentProps) {
   const page = useRoutePage();
-  const { experimentId } = useParams();
   const { user, loading, needsSetup } = useAuth();
   const isMobileState = useIsMobile();
   const navigationStack = useNavigationStack();
   const recordedPathRef = useRef<string | null>(null);
-
-  const currentExpId = page === "laboratory" ? experimentId ?? null : null;
-  const laboratory = useLaboratoryController({ experimentId: currentExpId, enabled: Boolean(user), navigate });
 
   useEffect(() => {
     if (recordedPathRef.current === locationPath) return;
@@ -62,11 +55,8 @@ function AppRouterContent({ locationPath, navigate }: AppRouterContentProps) {
 
   return <SessionsProvider>
     <GlobalApprovalOverlay />
-    <LaboratoryProvider controller={laboratory}>
-      <MainLayout page={page} onNavigate={navigate} isMobile={isMobileState.isMobile} canGoBack={navigationStack.canGoBack} onBack={handleBack} lab={{ selectedExpId: currentExpId, experiments: laboratory.experiments, onDeleteExperiment: laboratory.requestDelete, activeVariantTab: laboratory.activeVariantTab, setActiveVariantTab: laboratory.setActiveVariantTab, onRunExperiment: laboratory.requestRun, onStopExperiment: laboratory.stopRun, onEditExperiment: laboratory.requestEdit, onJudgeExperiment: laboratory.judgeExperiment, onExportExperiment: laboratory.requestExport, selectedRunId: laboratory.selectedRunId, pastRuns: laboratory.pastRuns, runPopoverOpen: laboratory.runPopoverOpen, setRunPopoverOpen: laboratory.setRunPopoverOpen, onSelectRun: laboratory.selectRun }}>
-        <Outlet />
-      </MainLayout>
-    </LaboratoryProvider>
-    <LaboratoryModals controller={laboratory} navigate={navigate} />
+    <MainLayout page={page} onNavigate={navigate} isMobile={isMobileState.isMobile} canGoBack={navigationStack.canGoBack} onBack={handleBack}>
+      <Outlet />
+    </MainLayout>
   </SessionsProvider>;
 }

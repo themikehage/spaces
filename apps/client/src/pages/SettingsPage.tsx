@@ -5,7 +5,6 @@ import { literals as u } from "./SettingsPage.literals";
 import { GeneralTab } from "@/components/settings/GeneralTab";
 import { ProvidersTab } from "@/components/settings/ProvidersTab";
 import { EnvVarsTab } from "@/components/settings/EnvVarsTab";
-import { IntegrationsTab } from "@/components/settings/IntegrationsTab";
 import { MCPMarketplacePage } from "@/pages/MCPMarketplacePage";
 
 interface EnvVar {
@@ -15,7 +14,7 @@ interface EnvVar {
 
 export function SettingsPage() {
   const l = useLiterals(u);
-  const [activeTab, setActiveTab] = useState<"general" | "providers" | "env" | "integrations" | "mcp">(() => {
+  const [activeTab, setActiveTab] = useState<"general" | "providers" | "env" | "mcp">(() => {
     return (localStorage.getItem("settings-active-tab") as any) || "general";
   });
   const [envVars, setEnvVars] = useState<EnvVar[]>([]);
@@ -40,14 +39,13 @@ export function SettingsPage() {
     fetchEnvVars();
   }, [fetchEnvVars]);
 
-  const handleTabChange = (tabId: "general" | "providers" | "env" | "integrations" | "mcp") => {
+  const handleTabChange = (tabId: "general" | "providers" | "env" | "mcp") => {
     setActiveTab(tabId);
     localStorage.setItem("settings-active-tab", tabId);
   };
 
   const tabs = [
     { id: "general", label: l.tabGeneral },
-    { id: "integrations", label: l.tabIntegrations },
     { id: "providers", label: l.tabProviders },
     { id: "env", label: l.tabEnv },
     { id: "mcp", label: l.tabMcp || "MCP Servers" },
@@ -95,9 +93,7 @@ export function SettingsPage() {
                   fetchEnvVars={fetchEnvVars}
                 />
               )}
-              {activeTab === "integrations" && (
-                <IntegrationsTab envVars={envVars} fetchEnvVars={fetchEnvVars} />
-              )}
+
             </div>
           )}
         </div>

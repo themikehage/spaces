@@ -26,12 +26,6 @@ export const instanceFragments: PromptFragment[] = [
     priority: 2,
   },
   {
-    key: "instance.team.negotiation.roster",
-    category: "instance",
-    content: "CONTEXTO DE EJECUCIÓN: Debate de Equipo (Negotiation).\nLos siguientes agentes son miembros de este equipo y deliberan en paralelo para alcanzar un consenso:\n{roster}\n\nNota: Las menciones en el chat no activan ejecuciones automáticas en este modo. Todos los participantes responden según el protocolo del debate.",
-    priority: 1,
-  },
-  {
     key: "instance.channel.broadcast",
     category: "instance",
     content: "MODO DE CANAL: Colaboración Horizontal (Leaderless).\nTu modo de respuesta es: {replyMode}.\nTodos los agentes ven todos los mensajes. No hay un coordinador central. Coordínense de forma autónoma basándose en las especialidades de cada uno y mantengan el foco en no duplicar esfuerzos.\n- Si tu replyMode es 'broadcast': recibes todos los mensajes de tus compañeros y debes participar cuando sea oportuno.\n- Si tu replyMode es 'targeted': respondes solo a tus compañeros objetivo configurados.\n- Si tu replyMode es 'mention-only': debes responder ÚNICAMENTE si eres mencionado explícitamente con '@Nombre' o '@id'.\n- Si tu replyMode es 'user-only': respondes solo a los mensajes del usuario humano.",

@@ -5,8 +5,6 @@ import { useChatScroll } from "@/hooks/useChatScroll";
 import { useChatInputFocus } from "@/hooks/useChatInputFocus";
 import { MessageList } from "./MessageList";
 import { ChatInput, processAttachments } from "./ChatInput";
-import { RightDrawer } from "./RightDrawer";
-import { AnimatePresence } from "framer-motion";
 import type { TaskRunnerState } from "shared";
 import { useLiterals, type MessageUsage, type ContextUsage } from "@/lib";
 import { literals as u } from "./ChatArea.literals";
@@ -167,7 +165,6 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
       },
     ];
   };
-  const [rightDrawerOpen, setRightDrawerOpen] = useState(false);
   const [sessionMetadata, setSessionMetadata] = useState<any>(null);
   const [tasksState, setTasksState] = useState<TaskRunnerState>({
     tasks: [],
@@ -791,15 +788,6 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
 
       </div>
 
-      <AnimatePresence>
-        {rightDrawerOpen && (
-          <RightDrawer
-            activeProjectName={activeProjectName}
-            onClose={() => setRightDrawerOpen(false)}
-            onSendPrompt={(prompt) => handleSend(prompt)}
-          />
-        )}
-      </AnimatePresence>
     </div>
   );
 }

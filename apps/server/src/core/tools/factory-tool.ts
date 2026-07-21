@@ -2,7 +2,6 @@ import { existsSync, mkdirSync, writeFileSync, rmSync, readFileSync, readdirSync
 import { join } from "node:path";
 import { agentRegistry } from "../../agents";
 import { sessionManager } from "../session-manager";
-import { ExperimentStore } from "../../laboratory/experiment-store";
 import { loadSkills } from "../../ai";
 import { getProjectsDir, getWorkspaceSkillsDir } from "shared";
 import { FACTORY_CONTRACTS } from "./factory-contracts";
@@ -16,7 +15,6 @@ const ENTITY_REFRESH_MAP: Record<string, string> = {
   agents: "agent",
   projects: "project",
   skills: "skill",
-  experiments: "experiment",
   teams: "team",
 };
 
@@ -395,58 +393,7 @@ async function handleSkills(action: string, id: string | undefined, params: any,
   return err(`Unknown action: ${action}`);
 }
 
-async function handleExperiments(action: string, id: string | undefined, params: any, username: string) {
-  if (action === "get") {
-    if (id) {
-      const exp = await ExperimentStore.getExperiment(username, id);
-      if (!exp) return err(`Experiment "${id}" not found`);
-      return ok(JSON.stringify(exp, null, 2), { entity: "experiments", id, data: exp });
-    }
-    const list = await ExperimentStore.listExperiments(username);
-    return ok(JSON.stringify(list, null, 2), { entity: "experiments", data: list });
-  }
 
-  if (action === "upsert") {
-    if (!id) return err("id is required for upsert");
-    if (!params.name) return err("name is required in params for experiment upsert");
-
-    const existing = await ExperimentStore.getExperiment(username, id);
-    if (existing) {
-      existing.name = params.name ?? existing.name;
-      if (params.taskPrompt !== undefined) existing.taskPrompt = params.taskPrompt;
-      if (params.judge) existing.judge = params.judge;
-      await ExperimentStore.saveExperiment(username, existing);
-      return ok(`Experiment "${id}" updated`, { entity: "experiments", id, status: "updated", data: existing });
-    }
-
-    const experiment: any = {
-      id,
-      name: params.name,
-      taskPrompt: params.taskPrompt ?? "",
-      status: "designing",
-      positions: [],
-      judge: params.judge ?? { criteria: ["Quality"], autoEvaluate: true },
-      variants: {
-        single: { type: "single", agents: [] },
-        multiNoLeader: { type: "multi_no_leader", agents: [] },
-        multiWithLeader: { type: "multi_with_leader", agents: [] },
-      },
-      createdAt: new Date().toISOString(),
-    };
-    await ExperimentStore.saveExperiment(username, experiment);
-    return ok(`Experiment "${id}" created`, { entity: "experiments", id, status: "created", data: experiment });
-  }
-
-  if (action === "delete") {
-    if (!id) return err("id is required for delete");
-    const existing = await ExperimentStore.getExperiment(username, id);
-    if (!existing) return err(`Experiment "${id}" not found`);
-    await ExperimentStore.deleteExperiment(username, id);
-    return ok(`Experiment "${id}" deleted`, { entity: "experiments", id, status: "deleted" });
-  }
-
-  return err(`Unknown action: ${action}`);
-}
 
 async function handleTeams(action: string, id: string | undefined, params: any, username: string) {
   const { teamStore, teamOrchestrator } = await import("../../teams");
@@ -478,12 +425,11 @@ async function handleTeams(action: string, id: string | undefined, params: any, 
         name: params.name || id,
         description: params.description,
         mode: params.mode,
-        teamType: params.teamType || "Negotiation",
+        teamType: params.teamType || "Orchestration",
         members: params.members || [],
         maxRounds: params.maxRounds,
         showThinking: params.showThinking,
         showTools: params.showTools,
-        negotiationProtocol: params.negotiationProtocol,
         avatarUrl: params.avatarUrl,
       });
       return ok(`Team "${id}" created`, { entity: "teams", id, status: "created", data: team });
@@ -588,7 +534,7 @@ export function createFactoryTool(opts: FactoryToolOptions) {
 
   return {
     name: "manage_factory",
-    description: `Manage CrewFactory entities directly. Operations on agents, projects, sessions, environment variables, LLM providers, custom skills, teams, laboratory experiments, and settings.
+    description: `Manage Spaces entities directly. Operations on agents, projects, sessions, environment variables, LLM providers, custom skills, teams, laboratory experiments, and settings.
 
 Available entities: agents, projects, sessions, env, providers, skills, teams, experiments, settings.
 Actions: get (list or read), upsert (create or update), delete (permanently remove), send (message dispatch to a team), member (add/update member of a team).
@@ -660,9 +606,7 @@ After mutating any entity, call refresh_ui to update the frontend sidebar.`,
         case "teams":
           result = await handleTeams(action, id, params, username);
           break;
-        case "experiments":
-          result = await handleExperiments(action, id, params, username);
-          break;
+
         case "settings":
           result = await handleSettings(action, id, params, username);
           break;

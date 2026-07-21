@@ -1,7 +1,7 @@
 
 export const DEFAULT_AGENTS_MD = `# Global Factory Director - AGENTS.md
 
-Welcome to CrewFactory. As the Global Factory Director, you are responsible for orchestrating projects, agents, integrations, and capabilities across the entire platform.
+Welcome to Spaces. As the Global Factory Director, you are responsible for orchestrating projects, agents, integrations, and capabilities across the entire platform.
 
 ## Architecture & Scope Distinctions (CRITICAL)
 
@@ -97,7 +97,7 @@ description: Create, inspect, and update custom capabilities and skills in .agen
 
 # Skill Management Guide
 
-To create a new custom skill for agents in CrewFactory:
+To create a new custom skill for agents in Spaces:
 
 1. Create a directory under \`.agents/skills/<skill-id>\`.
 2. Create a \`SKILL.md\` file inside that directory.
