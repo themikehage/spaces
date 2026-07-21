@@ -43,6 +43,13 @@ export const literals: Record<SupportedLocale, Record<string, string>> = {
     generateTestImage: "Generate Test Image",
     imageGenerated: "Image Generated Successfully!",
     loadingImagePreview: "Loading image preview...",
+    videoGenEnabled: "Enable Video Generation Tool",
+    diagnoseVideoGen: "Diagnose Video Generation Model",
+    promptGenerateVideo: "Prompt to generate video...",
+    generatingVideo: "Generating Video...",
+    generateTestVideo: "Generate Test Video",
+    videoGenerated: "Video Generated Successfully!",
+    loadingVideoPreview: "Loading video preview...",
 
     openMCP: "Open MCP Marketplace",
 
@@ -147,6 +154,13 @@ export const literals: Record<SupportedLocale, Record<string, string>> = {
     generateTestImage: "Generar Imagen de Prueba",
     imageGenerated: "Imagen Generada Exitosamente!",
     loadingImagePreview: "Cargando vista previa...",
+    videoGenEnabled: "Activar Herramienta de Generación de Video",
+    diagnoseVideoGen: "Diagnosticar Modelo de Generación de Video",
+    promptGenerateVideo: "Prompt para generar video...",
+    generatingVideo: "Generando Video...",
+    generateTestVideo: "Generar Video de Prueba",
+    videoGenerated: "¡Video Generado Exitosamente!",
+    loadingVideoPreview: "Cargando vista previa del video...",
 
     openMCP: "Abrir MCP Marketplace",
 

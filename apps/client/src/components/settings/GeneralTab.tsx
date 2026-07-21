@@ -54,13 +54,24 @@ export function GeneralTab() {
   const [imageBlobUrl, setImageBlobUrl] = useState<string | null>(null);
   const [imageError, setImageError] = useState<string | null>(null);
 
+  // Video Generation Diagnostic Test State
+  const [videoGenEnabled, setVideoGenEnabled] = useState(true);
+  const [videoTestPrompt, setVideoTestPrompt] = useState("A beautiful sunset over the mountains, cinematic");
+  const [testingVideo, setTestingVideo] = useState(false);
+  const [videoResult, setVideoResult] = useState<string | null>(null);
+  const [videoBlobUrl, setVideoBlobUrl] = useState<string | null>(null);
+  const [videoError, setVideoError] = useState<string | null>(null);
+
   useEffect(() => {
     return () => {
       if (imageBlobUrl) {
         window.URL.revokeObjectURL(imageBlobUrl);
       }
+      if (videoBlobUrl) {
+        window.URL.revokeObjectURL(videoBlobUrl);
+      }
     };
-  }, [imageBlobUrl]);
+  }, [imageBlobUrl, videoBlobUrl]);
 
   const handleVisionFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -170,6 +181,7 @@ export function GeneralTab() {
           setVisionModel(settingsData.visionModel || "");
           setImageGenModel(settingsData.imageGenModel || "");
           setVideoGenModel(settingsData.videoGenModel || "");
+          setVideoGenEnabled(settingsData.videoGenEnabled ?? true);
           setSubagentMaxDepth(settingsData.subagentMaxDepth ?? 1);
         }
 
@@ -242,6 +254,60 @@ export function GeneralTab() {
       });
     } catch (err) {
       console.error("Failed to update video generation model settings:", err);
+    }
+  };
+
+  const handleToggleVideoGenEnabled = async (enabled: boolean) => {
+    setVideoGenEnabled(enabled);
+    try {
+      await apiFetch("/api/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ videoGenEnabled: enabled }),
+      });
+    } catch (err) {
+      console.error("Failed to update video generation toggle:", err);
+    }
+  };
+
+  const handleTestVideoGen = async () => {
+    setTestingVideo(true);
+    setVideoResult(null);
+    setVideoError(null);
+    if (videoBlobUrl) {
+      window.URL.revokeObjectURL(videoBlobUrl);
+      setVideoBlobUrl(null);
+    }
+    try {
+      const res = await apiFetch("/api/settings/test-video-gen", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          modelId: videoGenModel,
+          prompt: videoTestPrompt,
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && data.videoUrl) {
+        setVideoResult(data.videoUrl);
+        const fileRes = await apiFetch(data.videoUrl + "?raw=true");
+        if (!fileRes.ok) {
+          throw new Error("Failed to download generated video for preview.");
+        }
+        const blob = await fileRes.blob();
+        const objUrl = window.URL.createObjectURL(blob);
+        setVideoBlobUrl(objUrl);
+      } else {
+        setVideoError(data.error || "Unknown video generation error");
+      }
+    } catch (err: any) {
+      setVideoError(err.message || String(err));
+    } finally {
+      setTestingVideo(false);
     }
   };
 
@@ -558,54 +624,119 @@ export function GeneralTab() {
               )}
             </div>
 
-            <div className="flex flex-col gap-1.5">
-              <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
-                {l.videoGenModel}
-              </label>
-              <Dropdown<string>
-                value={videoGenModel}
-                onChange={handleUpdateVideoGenModel}
-                options={videoGenModels.map(m => ({
-                  value: m.id,
-                  label: m.name,
-                }))}
-                placeholder={l.selectVideoGenModel}
-                matchWidth
-              />
+            <div className="flex flex-col gap-2 pt-2 border-t border-input/10">
+              <div className="flex items-center gap-2 select-none mb-1">
+                <input
+                  type="checkbox"
+                  id="videoGenEnabled"
+                  checked={videoGenEnabled}
+                  onChange={(e) => handleToggleVideoGenEnabled(e.target.checked)}
+                  className="w-4 h-4 accent-accent rounded border-input bg-background cursor-pointer"
+                />
+                <label htmlFor="videoGenEnabled" className="text-xs font-semibold text-foreground cursor-pointer">
+                  {l.videoGenEnabled}
+                </label>
+              </div>
 
-              {(() => {
-                const selected = videoGenModels.find(m => m.id === videoGenModel);
-                if (!selected) return null;
-                return (
-                  <div className="mt-2 bg-background p-3 rounded-lg border border-input/20 space-y-2 text-xs">
-                    {selected.description && (
-                      <p className="text-muted-foreground leading-relaxed">
-                        {selected.description}
-                      </p>
-                    )}
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2.5 border-t border-input/10">
-                      {selected.cost !== undefined && (
-                        <div>
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.cost}</span>
-                          <span className="text-foreground font-semibold">${selected.cost}{l.perVideo}</span>
+              {videoGenEnabled && (
+                <div className="flex flex-col gap-1.5 pl-6">
+                  <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                    {l.videoGenModel}
+                  </label>
+                  <Dropdown<string>
+                    value={videoGenModel}
+                    onChange={handleUpdateVideoGenModel}
+                    options={videoGenModels.map(m => ({
+                      value: m.id,
+                      label: m.name,
+                    }))}
+                    placeholder={l.selectVideoGenModel}
+                    matchWidth
+                  />
+
+                  {(() => {
+                    const selected = videoGenModels.find(m => m.id === videoGenModel);
+                    if (!selected) return null;
+                    return (
+                      <div className="mt-2 bg-background p-3 rounded-lg border border-input/20 space-y-2 text-xs">
+                        {selected.description && (
+                          <p className="text-muted-foreground leading-relaxed">
+                            {selected.description}
+                          </p>
+                        )}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2.5 border-t border-input/10">
+                          {selected.cost !== undefined && (
+                            <div>
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.cost}</span>
+                              <span className="text-foreground font-semibold">${selected.cost}{l.perVideo}</span>
+                            </div>
+                          )}
+                          {selected.rpm !== undefined && (
+                            <div>
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.rateLimit}</span>
+                              <span className="text-foreground font-semibold">{selected.rpm} {l.rpm}</span>
+                            </div>
+                          )}
+                          {selected.concurrency !== undefined && selected.concurrency !== null && (
+                            <div>
+                              <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.concurrency}</span>
+                              <span className="text-foreground font-semibold">{selected.concurrency} {l.concurrent}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {videoGenModel && (
+                    <div className="mt-2 bg-background/50 p-3 rounded-lg border border-input/20 space-y-3 text-xs">
+                      <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">
+                        {l.diagnoseVideoGen}
+                      </span>
+
+                      <div className="flex flex-col gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            value={videoTestPrompt}
+                            onChange={(e) => setVideoTestPrompt(e.target.value)}
+                            placeholder={l.promptGenerateVideo}
+                            className="flex-1 px-3 py-1.5 bg-background border border-input rounded-lg text-foreground outline-none focus:border-primary text-xs"
+                          />
+                          <button
+                            type="button"
+                            disabled={testingVideo || !videoTestPrompt.trim()}
+                            onClick={handleTestVideoGen}
+                            className="px-4 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 border border-primary/25 rounded-lg font-semibold transition-all disabled:opacity-50 cursor-pointer text-[11px]"
+                          >
+                            {testingVideo ? l.generatingVideo : l.generateTestVideo}
+                          </button>
+                        </div>
+                      </div>
+
+                      {videoResult && (
+                        <div className="p-2.5 bg-success/5 border border-success/20 text-success rounded-md space-y-2">
+                          <span className="font-bold block text-[11px]">{l.videoGenerated}</span>
+                          <div className="relative group max-w-sm rounded-lg overflow-hidden border border-input/40 bg-card p-1">
+                            {videoBlobUrl ? (
+                              <video src={videoBlobUrl} controls className="w-full h-auto object-contain rounded-md" />
+                            ) : (
+                              <div className="w-full h-32 flex items-center justify-center bg-card text-[11px] text-muted-foreground">{l.loadingVideoPreview}</div>
+                            )}
+                          </div>
                         </div>
                       )}
-                      {selected.rpm !== undefined && (
-                        <div>
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.rateLimit}</span>
-                          <span className="text-foreground font-semibold">{selected.rpm} {l.rpm}</span>
-                        </div>
-                      )}
-                      {selected.concurrency !== undefined && selected.concurrency !== null && (
-                        <div>
-                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.concurrency}</span>
-                          <span className="text-foreground font-semibold">{selected.concurrency} {l.concurrent}</span>
+
+                      {videoError && (
+                        <div className="p-2.5 bg-destructive/5 border border-error/20 text-destructive rounded-md whitespace-pre-wrap font-mono text-[11px] break-words select-all">
+                          <span className="font-bold block mb-1">{l.diagnosticFailure}</span>
+                          {videoError}
                         </div>
                       )}
                     </div>
-                  </div>
-                );
-              })()}
+                  )}
+                </div>
+              )}
             </div>
           </div>
         )}

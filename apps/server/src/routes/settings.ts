@@ -3,6 +3,7 @@ import { authMiddleware, getAuthPayload } from "../middleware/auth";
 import { sessionManager } from "../core/session-manager";
 import { runVisionModel } from "../core/tools/vision-tool";
 import { runImageGenModel } from "../core/tools/image-gen-tool";
+import { runVideoGenModel } from "../core/tools/video-gen-tool";
 import { getWorkspaceDir, getUserDir } from "shared";
 import { getAppConfig } from "../config/app-config";
 import { getUsername } from "../lib/auth-helpers";
@@ -54,6 +55,7 @@ settingsRouter.get("/", (c) => {
     visionModel: settings.visionModel ?? "",
     imageGenModel: settings.imageGenModel ?? "",
     videoGenModel: settings.videoGenModel ?? "",
+    videoGenEnabled: settings.videoGenEnabled ?? true,
     subagentMaxDepth: settings.subagentMaxDepth !== undefined
       ? Number(settings.subagentMaxDepth)
       : appConfig.subagent.maxDepth,
@@ -73,6 +75,7 @@ settingsRouter.patch("/", async (c) => {
       visionModel?: string;
       imageGenModel?: string;
       videoGenModel?: string;
+      videoGenEnabled?: boolean;
       subagentMaxDepth?: number;
       factoryName?: string;
       factoryAvatarUrl?: string | null;
@@ -98,6 +101,9 @@ settingsRouter.patch("/", async (c) => {
     }
     if (body.videoGenModel !== undefined) {
       updates.videoGenModel = String(body.videoGenModel);
+    }
+    if (body.videoGenEnabled !== undefined) {
+      updates.videoGenEnabled = !!body.videoGenEnabled;
     }
     if (body.subagentMaxDepth !== undefined) {
       const depthVal = Number(body.subagentMaxDepth);
@@ -231,6 +237,44 @@ settingsRouter.post("/test-image-gen", async (c) => {
     return c.json({ ok: true, imageUrl: `/api/workspace/${localPath.replace(/\\/g, "/")}` });
   } catch (err: any) {
     console.error(`[DIAGNOSTIC TEST-IMAGE-GEN] Error: ${err.message || String(err)}`);
+    return c.json({ error: err.message || String(err) }, 500);
+  }
+});
+
+settingsRouter.post("/test-video-gen", async (c) => {
+  const { username } = getAuthPayload(c);
+  try {
+    const body = await c.req.json<{
+      modelId: string;
+      prompt: string;
+      aspectRatio?: string;
+      duration?: number;
+    }>();
+
+    if (!body.modelId) {
+      return c.json({ error: "Missing modelId" }, 400);
+    }
+    if (!body.prompt) {
+      return c.json({ error: "Missing prompt" }, 400);
+    }
+
+    const { authStorage } = sessionManager.userConfig.getUserContext(username);
+    const userEnv = sessionManager.userConfig.getUserEnv(username);
+    const apiKey = authStorage.getApiKey("openrouter") || userEnv.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY || "";
+    console.log(`[DIAGNOSTIC TEST-VIDEO-GEN] Resolved OpenRouter key length: ${apiKey.length}.`);
+
+    const workspaceDir = getWorkspaceDir(username);
+    const localPath = await runVideoGenModel(
+      username,
+      body.modelId,
+      body.prompt,
+      body.aspectRatio || "16:9",
+      body.duration || 5,
+      workspaceDir
+    );
+    return c.json({ ok: true, videoUrl: `/api/workspace/${localPath.replace(/\\/g, "/")}` });
+  } catch (err: any) {
+    console.error(`[DIAGNOSTIC TEST-VIDEO-GEN] Error: ${err.message || String(err)}`);
     return c.json({ error: err.message || String(err) }, 500);
   }
 });

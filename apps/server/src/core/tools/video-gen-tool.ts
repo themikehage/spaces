@@ -194,6 +194,13 @@ export function createVideoGenTool(
     },
     execute: async (toolCallId: string, args: any) => {
       const settings = sessionManager.userConfig.getUserSettings(username);
+      if (settings.videoGenEnabled === false) {
+        return {
+          content: [{ type: "text", text: "Error: Video generation is currently disabled in your settings. Please enable it in Settings > General Tab." }],
+          isError: true
+        };
+      }
+
       const modelId = settings.videoGenModel;
 
       if (!modelId) {
