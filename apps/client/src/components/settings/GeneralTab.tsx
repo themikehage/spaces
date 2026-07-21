@@ -31,8 +31,10 @@ export function GeneralTab() {
 
   const [visionModel, setVisionModel] = useState("");
   const [imageGenModel, setImageGenModel] = useState("");
+  const [videoGenModel, setVideoGenModel] = useState("");
   const [visionModels, setVisionModels] = useState<Array<{ id: string; name: string; provider: string }>>([]);
   const [imageGenModels, setImageGenModels] = useState<Array<{ id: string; name: string; provider: string; description?: string; cost?: number; rpm?: number; concurrency?: number | null }>>([]);
+  const [videoGenModels, setVideoGenModels] = useState<Array<{ id: string; name: string; provider: string; description?: string; cost?: number; rpm?: number; concurrency?: number | null }>>([]);
   const [settingsLoading, setSettingsLoading] = useState(true);
   const [subagentMaxDepth, setSubagentMaxDepth] = useState<number>(1);
 
@@ -167,6 +169,7 @@ export function GeneralTab() {
           const settingsData = await settingsRes.json();
           setVisionModel(settingsData.visionModel || "");
           setImageGenModel(settingsData.imageGenModel || "");
+          setVideoGenModel(settingsData.videoGenModel || "");
           setSubagentMaxDepth(settingsData.subagentMaxDepth ?? 1);
         }
 
@@ -181,6 +184,12 @@ export function GeneralTab() {
         if (imgModelsRes.ok) {
           const imgModelsData = await imgModelsRes.json();
           setImageGenModels(imgModelsData.models || []);
+        }
+
+        const vidModelsRes = await apiFetch("/api/models/videos");
+        if (vidModelsRes.ok) {
+          const vidModelsData = await vidModelsRes.json();
+          setVideoGenModels(vidModelsData.models || []);
         }
       } catch (err) {
         console.error("Failed to load settings models:", err);
@@ -218,6 +227,21 @@ export function GeneralTab() {
       });
     } catch (err) {
       console.error("Failed to update image generation model settings:", err);
+    }
+  };
+
+  const handleUpdateVideoGenModel = async (model: string) => {
+    setVideoGenModel(model);
+    try {
+      await apiFetch("/api/settings", {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ videoGenModel: model }),
+      });
+    } catch (err) {
+      console.error("Failed to update video generation model settings:", err);
     }
   };
 
@@ -532,6 +556,56 @@ export function GeneralTab() {
                   )}
                 </div>
               )}
+            </div>
+
+            <div className="flex flex-col gap-1.5">
+              <label className="text-xs text-muted-foreground uppercase font-bold tracking-wider">
+                {l.videoGenModel}
+              </label>
+              <Dropdown<string>
+                value={videoGenModel}
+                onChange={handleUpdateVideoGenModel}
+                options={videoGenModels.map(m => ({
+                  value: m.id,
+                  label: m.name,
+                }))}
+                placeholder={l.selectVideoGenModel}
+                matchWidth
+              />
+
+              {(() => {
+                const selected = videoGenModels.find(m => m.id === videoGenModel);
+                if (!selected) return null;
+                return (
+                  <div className="mt-2 bg-background p-3 rounded-lg border border-input/20 space-y-2 text-xs">
+                    {selected.description && (
+                      <p className="text-muted-foreground leading-relaxed">
+                        {selected.description}
+                      </p>
+                    )}
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3 pt-2.5 border-t border-input/10">
+                      {selected.cost !== undefined && (
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.cost}</span>
+                          <span className="text-foreground font-semibold">${selected.cost}{l.perVideo}</span>
+                        </div>
+                      )}
+                      {selected.rpm !== undefined && (
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.rateLimit}</span>
+                          <span className="text-foreground font-semibold">{selected.rpm} {l.rpm}</span>
+                        </div>
+                      )}
+                      {selected.concurrency !== undefined && selected.concurrency !== null && (
+                        <div>
+                          <span className="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">{l.concurrency}</span>
+                          <span className="text-foreground font-semibold">{selected.concurrency} {l.concurrent}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         )}

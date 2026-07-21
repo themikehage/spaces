@@ -378,10 +378,24 @@ export class ModelRegistry {
           return undefined;
         })();
 
-        const hasVision = /vision|vl|multimodal|max|pro/i.test(id);
-        const input = explicitInput ?? (hasVision ? ["text", "image"] : ["text"]);
+        const hasVideo = /gemini|google\//i.test(id) || (explicitInput && explicitInput.includes("video")) || false;
+        const hasVision = hasVideo || /vision|vl|multimodal|max|pro/i.test(id);
+        let input = explicitInput ?? (hasVideo ? ["text", "image", "video"] : hasVision ? ["text", "image"] : ["text"]);
+        if (hasVideo && !input.includes("video")) {
+          input = [...input, "video"];
+        }
 
-        const cost = modelsDevEntry?.cost ?? m.cost;
+        let cost = modelsDevEntry?.cost ?? m.cost;
+        if (!cost && m.pricing) {
+          const inputCost = parseFloat(m.pricing.prompt) * 1000000;
+          const outputCost = parseFloat(m.pricing.completion) * 1000000;
+          if (!isNaN(inputCost) && !isNaN(outputCost)) {
+            cost = {
+              input: inputCost,
+              output: outputCost,
+            };
+          }
+        }
 
         const compat = (() => {
           const base = m.compat ?? {};

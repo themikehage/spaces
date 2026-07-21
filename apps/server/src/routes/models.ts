@@ -132,6 +132,47 @@ modelsRouter.get("/images", authMiddleware, (c) => {
   return c.json({ models });
 });
 
+modelsRouter.get("/videos", authMiddleware, async (c) => {
+  const { username } = getAuthPayload(c);
+  const { authStorage } = sessionManager.userConfig.getUserContext(username);
+  const userEnv = sessionManager.userConfig.getUserEnv(username);
+  const apiKey = authStorage.getApiKey("openrouter") || userEnv.OPENROUTER_API_KEY || process.env.OPENROUTER_API_KEY;
+
+  const defaultVideoModels = [
+    { id: "google/veo-3.1", name: "Google Veo 3.1", provider: "openrouter" },
+    { id: "kwaivgi/kling-v3.0-std", name: "Kling v3.0 Standard", provider: "openrouter" },
+    { id: "alibaba/wan-2.7", name: "Wan 2.7 Video", provider: "openrouter" },
+    { id: "minimax/hailuo-2.3", name: "Minimax Hailuo 2.3", provider: "openrouter" },
+    { id: "openai/sora-2-pro", name: "OpenAI Sora 2 Pro", provider: "openrouter" }
+  ];
+
+  if (!apiKey) {
+    return c.json({ models: defaultVideoModels });
+  }
+
+  try {
+    const res = await fetch("https://openrouter.ai/api/v1/videos/models", {
+      headers: {
+        Authorization: `Bearer ${apiKey}`
+      }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.data)) {
+        const models = data.data.map((m: any) => ({
+          id: m.id,
+          name: m.name || m.id,
+          provider: "openrouter"
+        }));
+        return c.json({ models });
+      }
+    }
+  } catch (err) {
+    console.error("[ModelsRouter] Failed to fetch video models from OpenRouter:", err);
+  }
+  return c.json({ models: defaultVideoModels });
+});
+
 modelsRouter.get("/", authMiddleware, (c) => {
   const { username } = getAuthPayload(c);
   const { modelRegistry } = sessionManager.userConfig.getUserContext(username);

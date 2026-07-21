@@ -53,6 +53,7 @@ settingsRouter.get("/", (c) => {
     memoryEmbeddings: settings.memoryEmbeddings ?? true,
     visionModel: settings.visionModel ?? "",
     imageGenModel: settings.imageGenModel ?? "",
+    videoGenModel: settings.videoGenModel ?? "",
     subagentMaxDepth: settings.subagentMaxDepth !== undefined
       ? Number(settings.subagentMaxDepth)
       : appConfig.subagent.maxDepth,
@@ -71,6 +72,7 @@ settingsRouter.patch("/", async (c) => {
       memoryEmbeddings?: boolean;
       visionModel?: string;
       imageGenModel?: string;
+      videoGenModel?: string;
       subagentMaxDepth?: number;
       factoryName?: string;
       factoryAvatarUrl?: string | null;
@@ -93,6 +95,9 @@ settingsRouter.patch("/", async (c) => {
     }
     if (body.imageGenModel !== undefined) {
       updates.imageGenModel = String(body.imageGenModel);
+    }
+    if (body.videoGenModel !== undefined) {
+      updates.videoGenModel = String(body.videoGenModel);
     }
     if (body.subagentMaxDepth !== undefined) {
       const depthVal = Number(body.subagentMaxDepth);

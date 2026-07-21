@@ -28,6 +28,9 @@ export const literals: Record<SupportedLocale, Record<string, string>> = {
 
     imageGenModel: "Image Generation Model",
     selectImageGenModel: "-- Select Image Generation Model --",
+    videoGenModel: "Video Generation Model",
+    selectVideoGenModel: "-- Select Video Generation Model --",
+    perVideo: "/ video",
     cost: "Cost",
     rateLimit: "Rate Limit",
     concurrency: "Concurrency",
@@ -129,6 +132,9 @@ export const literals: Record<SupportedLocale, Record<string, string>> = {
 
     imageGenModel: "Modelo de Generacion de Imagenes",
     selectImageGenModel: "-- Seleccionar Modelo de Generacion --",
+    videoGenModel: "Modelo de Generación de Video",
+    selectVideoGenModel: "-- Seleccionar Modelo de Generación de Video --",
+    perVideo: "/ video",
     cost: "Costo",
     rateLimit: "Limite de Peticiones",
     concurrency: "Concurrencia",

@@ -1,6 +1,7 @@
 import { uiApprovalRegistry } from "../ui-approval-registry";
 import { createVisionTool } from "./vision-tool";
 import { createImageGenTool } from "./image-gen-tool";
+import { createVideoGenTool } from "./video-gen-tool";
 
 export function createUiTools(
   workspaceDir: string,
@@ -250,7 +251,8 @@ export function createUiTools(
     shareFileTool,
     refreshUiTool,
     visionTool,
-    imageGenTool
+    imageGenTool,
+    createVideoGenTool(workspaceDir, username)
   ];
 
   if (subagentOptions) {

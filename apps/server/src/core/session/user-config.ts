@@ -15,6 +15,7 @@ import { registerXAIProvider } from "../providers/xai-provider";
 import { registerDeepSeekProvider } from "../providers/deepseek-provider";
 import { registerGroqProvider } from "../providers/groq-provider";
 import { registerMistralProvider } from "../providers/mistral-provider";
+import { registerOpenRouterProvider } from "../providers/openrouter-provider";
 import { saveProviderModels } from "../providers/provider-persistence";
 import { encryptEnv, decryptEnv } from "../../lib/env-crypto";
 import { auth } from "../../auth/index";
@@ -125,6 +126,7 @@ export class UserConfigManager {
       };
       ensureStale("opencode-go");
       ensureStale("qwen");
+      ensureStale("openrouter");
       return existing;
     }
 
@@ -141,6 +143,7 @@ export class UserConfigManager {
     registerDeepSeekProvider(modelRegistry);
     registerGroqProvider(modelRegistry);
     registerMistralProvider(modelRegistry);
+    registerOpenRouterProvider(modelRegistry, username);
     modelRegistry.refresh();
 
     const ctx: UserContext = { authStorage, modelRegistry };
@@ -170,6 +173,7 @@ export class UserConfigManager {
 
     ensureModelsForProvider("opencode-go");
     ensureModelsForProvider("qwen");
+    ensureModelsForProvider("openrouter");
 
     return ctx;
   }
