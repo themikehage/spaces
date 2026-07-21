@@ -256,10 +256,8 @@ export function createUiTools(
   ];
 
   if (subagentOptions) {
-    const { createSpawnSubagentTool } = require("./spawn-subagent-tool");
-    tools.push(createSpawnSubagentTool(subagentOptions));
-    const { createDelegateTaskTool } = require("./delegate-tool");
-    tools.push(createDelegateTaskTool(subagentOptions));
+    const { createManageDelegationsTool } = require("./manage-delegations-tool");
+    tools.push(createManageDelegationsTool(subagentOptions));
     const { createDecomposeTasksTool } = require("./decompose-tool");
     tools.push(createDecomposeTasksTool({
       username: subagentOptions.username,

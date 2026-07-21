@@ -1278,4 +1278,19 @@ sessionsRouter.get("/:id/delegations/:toolCallId", async (c) => {
   return c.json({ delegation });
 });
 
+sessionsRouter.post("/:id/delegations/:toolCallId/abort", async (c) => {
+  const sessionId = c.req.param("id");
+  const toolCallId = c.req.param("toolCallId");
+  const { username } = getAuthPayload(c);
+
+  const delegation = delegationRegistry.getByToolCallId(username, sessionId, toolCallId);
+  if (!delegation) {
+    return c.json({ error: "Delegation not found" }, 404);
+  }
+
+  delegationRegistry.abortAllRecursive(delegation.subagentSessionId);
+  return c.json({ success: true });
+});
+
+
 

@@ -20,6 +20,7 @@ export function DelegationsPanel({ sessionId, activeProjectName, activeAgent = n
   const [delegations, setDelegations] = useState<PendingDelegation[]>([]);
   const [loading, setLoading] = useState(false);
   const [selectedDelegationId, setSelectedDelegationId] = useState<string | null>(null);
+  const [abortingCallId, setAbortingCallId] = useState<string | null>(null);
 
   const { subscribe } = useWebSocket(null);
 
@@ -30,6 +31,26 @@ export function DelegationsPanel({ sessionId, activeProjectName, activeAgent = n
     else if (activeProjectName) basePath = `/projects/${activeProjectName}`;
     return id ? `${basePath}/session/${id}` : (basePath ? `${basePath}/chat` : "/");
   }, [activeTeam, activeAgent, activeProjectName]);
+
+  const handleAbort = useCallback(async (toolCallId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    if (!sessionId) return;
+    setAbortingCallId(toolCallId);
+    try {
+      const res = await apiFetch(`/api/sessions/${sessionId}/delegations/${toolCallId}/abort`, {
+        method: "POST"
+      });
+      if (res.ok) {
+        setDelegations((prev) =>
+          prev.map((d) => (d.toolCallId === toolCallId ? { ...d, status: "blocked" } : d))
+        );
+      }
+    } catch (err) {
+      console.error("Failed to abort delegation:", err);
+    } finally {
+      setAbortingCallId(null);
+    }
+  }, [sessionId]);
 
   const fetchDelegations = useCallback(async () => {
     if (!sessionId) return;
@@ -194,21 +215,32 @@ export function DelegationsPanel({ sessionId, activeProjectName, activeAgent = n
                     {d.task}
                   </h3>
                   <div className="flex items-center justify-between border-t border-border/30 pt-2 text-[10px] text-text-secondary">
-                    <span className="font-mono text-[9px] truncate max-w-[150px]">
+                    <span className="font-mono text-[9px] truncate max-w-[100px]">
                       ID: {d.toolCallId}
                     </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(getSessionPath(d.subagentSessionId));
-                      }}
-                      className="text-accent hover:underline flex items-center gap-1 font-medium transition-all"
-                    >
-                      {l.actionNavigate}
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                      </svg>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      {isRunning && (
+                        <button
+                          disabled={abortingCallId === d.toolCallId}
+                          onClick={(e) => handleAbort(d.toolCallId, e)}
+                          className="text-red-400 hover:text-red-300 font-semibold transition-all disabled:opacity-50"
+                        >
+                          {abortingCallId === d.toolCallId ? "Aborting..." : "Abort"}
+                        </button>
+                      )}
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(getSessionPath(d.subagentSessionId));
+                        }}
+                        className="text-accent hover:underline flex items-center gap-1 font-medium transition-all"
+                      >
+                        {l.actionNavigate}
+                        <svg className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                        </svg>
+                      </button>
+                    </div>
                   </div>
                 </motion.div>
               );
@@ -309,8 +341,17 @@ export function DelegationsPanel({ sessionId, activeProjectName, activeAgent = n
               )}
             </div>
 
-            {/* View Session Footer Button */}
-            <div className="p-4 border-t border-border bg-surface/50">
+            {/* View Session / Abort Footer Buttons */}
+            <div className="p-4 border-t border-border bg-surface/50 flex flex-col gap-2">
+              {selectedDelegation.status === "running" && (
+                <button
+                  disabled={abortingCallId === selectedDelegation.toolCallId}
+                  onClick={() => handleAbort(selectedDelegation.toolCallId)}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded bg-red-500 hover:bg-red-600 active:scale-[0.98] transition-all text-xs font-semibold text-white cursor-pointer disabled:opacity-50"
+                >
+                  {abortingCallId === selectedDelegation.toolCallId ? "Cancelando..." : "Abortar Delegación"}
+                </button>
+              )}
               <button
                 onClick={() => navigate(getSessionPath(selectedDelegation.subagentSessionId))}
                 className="w-full flex items-center justify-center gap-2 py-2 px-4 rounded bg-accent text-bg hover:bg-accent-hover active:scale-[0.98] transition-all text-xs font-semibold cursor-pointer"

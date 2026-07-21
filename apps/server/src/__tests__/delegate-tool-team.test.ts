@@ -1,5 +1,5 @@
 import { expect, test, describe, beforeAll, mock } from "bun:test";
-import { createDelegateTaskTool } from "../core/tools/delegate-tool";
+import { createManageDelegationsTool } from "../core/tools/manage-delegations-tool";
 import { agentRegistry } from "../agents";
 import { sessionManager } from "../core/session-manager";
 
@@ -81,7 +81,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
       return null;
     };
 
-    const tool = createDelegateTaskTool({
+    const tool = createManageDelegationsTool({
       workspaceDir: "/tmp/dummy",
       username,
       parentSessionId,
@@ -93,6 +93,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
     });
 
     const result = await tool.execute("call_1", {
+      action: "delegate",
       targetType: "agent",
       targetId: specialistId,
       task: "Analyze tests",
@@ -108,7 +109,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
   });
 
   test("Should reject delegation to agent not in permittedAgentIds list", async () => {
-    const tool = createDelegateTaskTool({
+    const tool = createManageDelegationsTool({
       workspaceDir: "/tmp/dummy",
       username,
       parentSessionId,
@@ -121,6 +122,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
 
     expect(
       tool.execute("call_2", {
+        action: "delegate",
         targetType: "agent",
         targetId: unauthorizedId,
         task: "Analyze logs",
@@ -160,7 +162,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
       return null;
     };
 
-    const tool = createDelegateTaskTool({
+    const tool = createManageDelegationsTool({
       workspaceDir: "/tmp/dummy",
       username,
       parentSessionId,
@@ -173,6 +175,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
     });
 
     await tool.execute("call_3", {
+      action: "delegate",
       targetType: "agent",
       targetId: specialistId,
       task: "Analyze tests",
@@ -218,7 +221,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
       return null;
     };
 
-    const tool = createDelegateTaskTool({
+    const tool = createManageDelegationsTool({
       workspaceDir: "/tmp/dummy",
       username,
       parentSessionId,
@@ -230,6 +233,7 @@ describe("delegate_task Tool Team Integration Tests", () => {
     });
 
     await tool.execute("call_4", {
+      action: "delegate",
       targetType: "agent",
       targetId: specialistId,
       task: "Analyze tests under parent session",

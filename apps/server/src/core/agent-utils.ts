@@ -272,4 +272,98 @@ export function collectChannelTokens(
   return { tokensIn, tokensOut };
 }
 
+/**
+ * Handles completing a delegation session, updating registry, formatting and posting results to parent session,
+ * and waking up parent session if it is not currently streaming.
+ */
+export async function handleDelegationCompletion(opts: {
+  username: string;
+  parentSessionId: string;
+  toolCallId: string;
+  status: "success" | "error" | "blocked";
+  envelope: EnvelopeResult;
+  subagentSessionId: string;
+  toolName: string;
+  lastText?: string;
+  includeFullHistory?: boolean;
+  executionResultText?: string;
+}) {
+  const {
+    username,
+    parentSessionId,
+    toolCallId,
+    status,
+    envelope,
+    subagentSessionId,
+    toolName,
+    lastText = "",
+    includeFullHistory = false,
+    executionResultText = "",
+  } = opts;
+
+  // Complete in registry
+  const { delegationRegistry } = await import("./delegation-registry");
+  delegationRegistry.complete(username, parentSessionId, toolCallId, status, envelope);
+
+  // Add to parent session's result queue
+  const { sessionManager } = await import("./session-manager");
+  let parent = sessionManager.getSession(username, parentSessionId);
+  if (!parent) {
+    try {
+      parent = await sessionManager.getOrCreateSession(username, parentSessionId);
+    } catch (e) {
+      console.error(`[Delegation] Failed to load/create parent session ${parentSessionId}`, e);
+    }
+  }
+
+  if (parent) {
+    const toolResultMsg = formatDelegationResultMessage(toolCallId, toolName, envelope, subagentSessionId, lastText);
+    if (includeFullHistory && executionResultText) {
+      const baseText = toolResultMsg.content[0].text;
+      toolResultMsg.content = [{
+        type: "text",
+        text: `${baseText}\n\n=== FULL CONVERSATION HISTORY ===\n\n${executionResultText}`
+      }];
+    }
+    parent.addDelegationResult(toolResultMsg);
+
+    // If parent is not active streaming, continue execution
+    if (!parent.isStreaming) {
+      let success = false;
+      try {
+        await parent.continue();
+        success = true;
+      } catch (e) {
+        console.error("[Delegation Async Return] Parent continue fail, will retry in 1s:", e);
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        try {
+          await parent.continue();
+          success = true;
+        } catch (e2) {
+          console.error("[Delegation Async Return] Parent continue retry fail:", e2);
+        }
+      }
+
+      if (!success) {
+        try {
+          const { broadcastToUser } = await import("../ws/handler");
+          broadcastToUser(username, {
+            type: "delegation_completed",
+            parentSessionId,
+            subagentSessionId,
+            toolCallId,
+            status,
+            result: envelope,
+          });
+        } catch (e3) {
+          console.error("Failed to broadcast fallback delegation_completed:", e3);
+        }
+      }
+    }
+  } else {
+    console.warn(`[Delegation] Parent session ${parentSessionId} not found for toolCallId ${toolCallId} — delegation result discarded`);
+  }
+}
+
+
 

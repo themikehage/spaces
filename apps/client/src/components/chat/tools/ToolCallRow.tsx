@@ -20,6 +20,7 @@ import { useLiterals } from "@/lib";
 import { literals } from "./ToolCallRow.literals";
 import { CustomToolBody } from "./custom";
 import { ArrowRight } from "lucide-react";
+import { SubagentLiveView } from "./SubagentLiveView";
 
 export interface ToolContentBlock {
   type: string;
@@ -221,6 +222,17 @@ const TOOL_META: Record<string, { label: string; colorClass: string; icon: React
       </svg>
     ),
   },
+  manage_delegations: {
+    label: "manage_delegations",
+    colorClass: "text-primary",
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+        <circle cx="9" cy="7" r="4" />
+      </svg>
+    ),
+  },
   exa_search: {
     label: "exa_search",
     colorClass: "text-highlight",
@@ -339,6 +351,16 @@ function getArgSummary(toolName: string, args: Record<string, unknown>, l: Recor
 
       return ``;
     }
+    case "manage_delegations": {
+      const task = (args.task as string) || "";
+      const cleanTask = task.length > 40 ? task.slice(0, 40) + "…" : task;
+      if (args.action === "spawn") {
+        const role = (args.subagentRole as string) || "";
+        return role ? `[spawn: ${role}] ${cleanTask}` : `[spawn] ${cleanTask}`;
+      } else {
+        return `[delegate to ${args.targetType || ""}:${args.targetId || ""}] ${cleanTask}`;
+      }
+    }
     case "exa_search": {
       const q = (args.query as string) || "";
       return q.length > 60 ? q.slice(0, 60) + "…" : q;
@@ -418,6 +440,7 @@ function getResultSummary(toolName: string, result: ToolResultData, l: Record<st
     case "create_experiment": return "creado/actualizado";
     case "spawn_subagent": return l.resCompleted;
     case "delegate_task": return l.resCompleted;
+    case "manage_delegations": return l.resCompleted;
     case "exa_search": {
       const n = result.details?.totalResults ?? 0;
       return `${n} ${n !== 1 ? l.resExaResults : l.resExaResult}`;
@@ -509,6 +532,34 @@ function ToolBody({
               </span>
             </div>
           </div>
+        </div>
+      );
+    }
+    case "manage_delegations": {
+      const task = (args.task as string) || "";
+      const isSpawn = args.action === "spawn";
+      return (
+        <div className="flex flex-col gap-2 w-full">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-xs text-text-primary truncate flex-1">
+              {task}
+            </span>
+            {onOpenSubagentConsole && (
+              <button
+                onClick={() => {
+                  if (isSpawn) {
+                    onOpenSubagentConsole(encodeURIComponent(toolCallId || ""));
+                  } else {
+                    onOpenSubagentConsole(encodeURIComponent(toolCallId || ""), String(args.targetType || ""), String(args.targetId || ""));
+                  }
+                }}
+                className="shrink-0 text-xs text-text-primary hover:text-accent transition-colors cursor-pointer underline underline-offset-2"
+              >
+                {isSpawn ? l.bodySubagentView : l.bodyViewLiveConsole}
+              </button>
+            )}
+          </div>
+          <SubagentLiveView toolCallId={toolCallId || ""} isComplete={result !== null} />
         </div>
       );
     }
@@ -693,7 +744,7 @@ export function ToolCallRow({
   onOpenSubagentConsole,
 }: Props) {
   const l = useLiterals(literals);
-  const isInteractive = serialTools.includes(toolName) || toolName === "spawn_subagent" || toolName === "delegate_task";
+  const isInteractive = serialTools.includes(toolName) || toolName === "manage_delegations" || toolName === "spawn_subagent" || toolName === "delegate_task";
 
   const [partialResult, setPartialResult] = useState<any>(null);
 
@@ -717,7 +768,7 @@ export function ToolCallRow({
   const isCustomTool = ![
     "read", "write", "edit", "bash", "grep", "find", "ls",
     "request_approval", "ask_question", "render_images", "render_html", "render_chart",
-    "share_file", "refresh_ui", "spawn_subagent", "delegate_task",
+    "share_file", "refresh_ui", "manage_delegations", "spawn_subagent", "delegate_task",
     "exa_search", "web_fetch", "decompose_tasks", "update_task_status", "complete_task_list",
     "memory_store", "memory_recall", "memory_forget", "create_experiment",
     "vision", "generate_image", "manage_factory", "manage_custom_tools"
@@ -774,6 +825,7 @@ export function ToolCallRow({
       case "refresh_ui": return l.labelRefresh;
       case "spawn_subagent": return l.labelSubagent;
       case "delegate_task": return l.labelDelegation;
+      case "manage_delegations": return l.labelDelegation;
       case "exa_search": return l.labelExaSearch;
       case "web_fetch": return l.labelWebFetch;
       case "memory_recall":
@@ -828,6 +880,28 @@ export function ToolCallRow({
               {String(args.targetId)}
             </span>
 
+          </>
+        )}
+
+        {toolName === "manage_delegations" && (
+          <>
+            {args.action === "spawn" ? (
+              <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
+                {`spawn:${args.subagentType || "builder"}`}
+              </span>
+            ) : (
+              <>
+                <span className="text-[10px] font-mono uppercase tracking-wider text-text-secondary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
+                  {`delegate:${args.targetType || ""}`}
+                </span>
+                <span className="text-[10px]">
+                  <ArrowRight className="w-2 h-2" />
+                </span>
+                <span className="text-[10px] font-bold tracking-wider text-primary bg-surface-hover px-1.5 py-0.5 rounded flex-shrink-0">
+                  {String(args.targetId)}
+                </span>
+              </>
+            )}
           </>
         )}
 

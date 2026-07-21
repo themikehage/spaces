@@ -14,7 +14,7 @@ El repositorio es un monorepo con workspaces de `pnpm`:
 ## Capacidades principales
 
 - Gestión de proyectos, sesiones, archivos y workspaces.
-- Orquestación de agentes y equipos, incluidas delegaciones y aprobaciones humanas.
+- Orquestación de agentes y equipos mediante la herramienta unificada `manage_delegations` que maneja subagentes aislados (`spawn`) y derivaciones (`delegate`), con control de cancelación (abort) desde UI y flujo de actividad en tiempo real.
 - Catálogo y configuración de proveedores y modelos de IA por usuario.
 - Integración con skills, plugins y servidores MCP.
 - Previsualización de proyectos, backups, logs y galería/factory.

@@ -500,6 +500,15 @@ export class AgentSession {
     } finally {
       this.isStreaming = false;
       this.abortController = null;
+      if (this.agent?.hasQueuedMessages()) {
+        setTimeout(() => {
+          if (!this.isStreaming && this.agent?.hasQueuedMessages()) {
+            this.continue().catch((e) => {
+              console.error("[AgentSession] Auto-continue on queued messages failed:", e);
+            });
+          }
+        }, 50);
+      }
     }
   }
 
@@ -553,6 +562,15 @@ export class AgentSession {
     } finally {
       this.isStreaming = false;
       this.abortController = null;
+      if (this.agent?.hasQueuedMessages()) {
+        setTimeout(() => {
+          if (!this.isStreaming && this.agent?.hasQueuedMessages()) {
+            this.continue().catch((e) => {
+              console.error("[AgentSession] Auto-continue on queued messages failed:", e);
+            });
+          }
+        }, 50);
+      }
     }
   }
 
