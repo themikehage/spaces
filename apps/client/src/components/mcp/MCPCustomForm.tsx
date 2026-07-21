@@ -279,6 +279,7 @@ export function MCPCustomForm({
                       />
                       <input
                         type="password"
+                        autoComplete="off"
                         placeholder="VALUE"
                         required
                         value={row.value}

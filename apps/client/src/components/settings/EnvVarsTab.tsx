@@ -322,6 +322,7 @@ const l = useLiterals(u);
                 <label className="text-muted-foreground text-[11px] block mb-1">Value</label>
                 <input
                   type="password"
+                  autoComplete="off"
                   value={newEnvVal}
                   onChange={(e) => setNewEnvVal(e.target.value)}
                   placeholder={l.enterValue}

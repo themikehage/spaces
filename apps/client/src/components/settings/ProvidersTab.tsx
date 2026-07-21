@@ -167,6 +167,7 @@ const l = useLiterals(u);
         </svg>
         <input
           type="text"
+          autoComplete="off"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder={l.searchPlaceholder}
@@ -281,6 +282,7 @@ const l = useLiterals(u);
             </h3>
             <input
               type="password"
+              autoComplete="new-password"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="sk-..."

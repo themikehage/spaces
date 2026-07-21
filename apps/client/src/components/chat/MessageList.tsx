@@ -145,19 +145,19 @@ function BranchNav({ msg, onNavigate }: { msg: Message; onNavigate?: (id: string
   return (
     <div className={clsx(
       "flex items-center gap-1.5 mt-2 pt-1.5 border-t select-none text-xs font-mono",
-      msg.role === "user" ? "border-bg/10 text-background/80" : "border-input/30 text-muted-foreground"
+      msg.role === "user" ? "border-border/40 text-muted-foreground" : "border-input/30 text-muted-foreground"
     )}>
       <button
         onClick={() => { const i = msg.siblings!.indexOf(msg.id!); if (i > 0) onNavigate(msg.siblings![i - 1]); }}
         disabled={idx === 0}
-        className={clsx("p-0.5 rounded transition-colors cursor-pointer", idx > 0 ? (msg.role === "user" ? "hover:bg-background/10 hover:text-background text-background/80" : "hover:bg-card-hover hover:text-foreground text-muted-foreground/80") : "opacity-30 cursor-not-allowed")}
+        className={clsx("p-0.5 rounded transition-colors cursor-pointer", idx > 0 ? (msg.role === "user" ? "hover:bg-muted hover:text-foreground text-muted-foreground" : "hover:bg-card-hover hover:text-foreground text-muted-foreground/80") : "opacity-30 cursor-not-allowed")}
         title={l.prevVersion}
       >←</button>
       <span>{idx + 1} / {msg.siblings.length}</span>
       <button
         onClick={() => { const i = msg.siblings!.indexOf(msg.id!); if (i < msg.siblings!.length - 1) onNavigate(msg.siblings![i + 1]); }}
         disabled={idx === msg.siblings.length - 1}
-        className={clsx("p-0.5 rounded transition-colors cursor-pointer", idx < msg.siblings.length - 1 ? (msg.role === "user" ? "hover:bg-background/10 hover:text-background text-background/80" : "hover:bg-card-hover hover:text-foreground text-muted-foreground/80") : "opacity-30 cursor-not-allowed")}
+        className={clsx("p-0.5 rounded transition-colors cursor-pointer", idx < msg.siblings.length - 1 ? (msg.role === "user" ? "hover:bg-muted hover:text-foreground text-muted-foreground" : "hover:bg-card-hover hover:text-foreground text-muted-foreground/80") : "opacity-30 cursor-not-allowed")}
         title={l.nextVersion}
       >→</button>
     </div>
@@ -509,7 +509,7 @@ function UserBubble({
                 )}
               </div>
             )}
-            <p className="text-base md:text-sm leading-relaxed whitespace-pre-wrap break-words break-word font-sans text-left">{displayText}</p>
+            <p className="text-base md:text-sm leading-relaxed whitespace-pre-wrap break-words break-word font-sans text-left text-foreground">{displayText}</p>
             {msg.isError && (
               <div className="mt-1.5 text-xs text-error">Error sending message</div>
             )}
