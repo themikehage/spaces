@@ -24,7 +24,7 @@
 - [ ] Añadir pruebas de integración para rutas críticas: autenticación, sesiones, archivos y WebSocket.
 - [ ] Ampliar las pruebas de la orquestación de agentes, equipos y aprobaciones.
 - [ ] Eliminar los usos restantes de `any` y reforzar los contratos de API.
-- [ ] Sustituir enlaces locales fijos de la landing por configuración de entorno o rutas de despliegue.
+- [x] Sustituir enlaces locales fijos de la landing por configuración de entorno o rutas de despliegue.
 - [ ] Documentar variables de entorno, persistencia local y procedimiento de despliegue.
 
 ## Criterio de cierre del sprint
