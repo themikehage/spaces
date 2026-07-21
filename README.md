@@ -6,6 +6,15 @@ Spaces is a full-stack platform where projects are real execution environments �
 
 ---
 
+## 🤖 OpenAI Build Week: Powered by Codex & GPT-5.6
+
+Spaces was created for the **OpenAI Build Week Hackathon**, leveraging OpenAI's advanced AI models for both product development and core agent runtime execution:
+
+- **OpenAI Codex**: Used during development to accelerate full-stack scaffolding—from generating shared Zod schemas in `packages/shared` to building Hono API routes, WebSocket streaming servers, and React 19 UI components.
+- **GPT-5.6**: Powers the primary Controller Agents inside Spaces. It acts as the lead orchestrator, decomposing complex goals into subtasks, directing specialist subagents via `manage_delegations`, and synthesizing real-time decision timelines.
+
+---
+
 ## Architecture
 
 Spaces is a pnpm monorepo with four workspaces:
