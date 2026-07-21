@@ -45,7 +45,12 @@ filesRouter.get("/workspace-projects/:id/avatar", async (c) => {
   return c.body(file as any, 200, responseHeaders);
 });
 
-filesRouter.use("/*", sessionMiddleware);
+filesRouter.use("/*", async (c, next) => {
+  if (c.req.path.startsWith("/api/preview/")) {
+    return next();
+  }
+  return sessionMiddleware(c, next);
+});
 
 function validateWorkspacePath(username: string, relativePath: string, projectName?: string, agentId?: string, teamId?: string): string {
   const workspaceBase = getWorkspaceDir(username);

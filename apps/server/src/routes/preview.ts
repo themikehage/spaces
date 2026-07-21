@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { resolve, normalize, sep, extname } from "node:path";
 import { existsSync } from "node:fs";
 import { getUsername } from "../lib/auth-helpers";
+import { sessionMiddleware } from "../auth/middleware";
 import { getPreviewState } from "../core/preview-watcher";
 import {
   loadPreviewConfig,
@@ -11,6 +12,11 @@ import { runBuild, abortBuild } from "../core/preview-builder";
 import { getWorkspaceDir } from "shared";
 
 export const previewRouter = new Hono();
+
+previewRouter.use("/state", sessionMiddleware);
+previewRouter.use("/config", sessionMiddleware);
+previewRouter.use("/build", sessionMiddleware);
+previewRouter.use("/build/*", sessionMiddleware);
 
 const MIME_MAP: Record<string, string> = {
   ".html": "text/html; charset=utf-8",
