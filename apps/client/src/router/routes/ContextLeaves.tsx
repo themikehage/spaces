@@ -7,8 +7,8 @@ import { WorkspacePanel } from "@/components/workspace/WorkspacePanel";
 import { TimelineTabPanel } from "@/components/chat/TimelineTabPanel";
 import { TeamDetailPage } from "@/pages/TeamDetailPage";
 import { TeamOrgPage } from "@/pages/TeamOrgPage";
-import { useWorkspaceContext } from "@/hooks/useWorkspaceContext";
 import { ProjectFloorPanel } from "@/components/projects/ProjectFloorPanel";
+import { useWorkspaceContext } from "@/hooks/useWorkspaceContext";
 
 function sessionFromSplat(splat: string | undefined, suffix = ""): string | null {
   const value = splat?.replace(new RegExp(`${suffix}$`), "") ?? "";
@@ -21,7 +21,7 @@ export function ChatRoute() {
   const sessionId = sessionFromSplat(splat);
   const projectDisplayName = activeProjectFriendlyName || activeProjectId;
   if (activeTeam) return <TeamChatArea key={`${sessionId}-${activeTeam.id}`} activeTeam={activeTeam} sessionId={sessionId} />;
-  return <ChatArea key={`${sessionId}-${activeProjectId}-${activeAgent?.id}`} sessionId={sessionId} activeProjectName={projectDisplayName} activeAgent={activeAgent} />;
+  return <ChatArea key={`${sessionId}-${activeProjectId}-${activeAgent?.id}`} sessionId={sessionId} activeProjectName={projectDisplayName} activeProjectId={activeProjectId} activeAgent={activeAgent} />;
 }
 
 export function SessionRoute() {

@@ -13,6 +13,8 @@ import {
   getTeamWorkspaceDir,
   getMemoryDbPath,
   SessionPrefix,
+  getAgentWorkspaceDir,
+  getProjectWorkspaceDir,
 } from "shared";
 import { mcpRegistry } from "./mcp-registry";
 import { memoryRegistry } from "./memory/registry";
@@ -26,6 +28,7 @@ import {
   getResolvedSkillPaths,
   ensureWorkspaceStructure,
   resolveSessionWorkspace,
+  resolveProjectDir,
 } from "./session/workspace-resolver";
 import { resolveAgentDefinition } from "./session/agent-definition-resolver";
 import { resolveActiveTools } from "./session/tool-activation-engine";
@@ -290,11 +293,19 @@ class SessionManager {
           persistedTools = Array.isArray(existingMeta.tools) ? existingMeta.tools : undefined;
         }
 
-        if (existingMeta.teamId) {
-          workspaceDir = getTeamWorkspaceDir(username, existingMeta.teamId);
-          if (!existsSync(workspaceDir)) {
-            mkdirSync(workspaceDir, { recursive: true });
+        if (!overrides?.workspaceDir) {
+          if (existingMeta.teamId) {
+            workspaceDir = getTeamWorkspaceDir(username, existingMeta.teamId);
+          } else if (resolvedAgentId) {
+            workspaceDir = getAgentWorkspaceDir(username, resolvedAgentId);
+          } else if (resolvedProjectId) {
+            const resolved = resolveProjectDir(username, resolvedProjectId);
+            workspaceDir = resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, resolvedProjectId);
           }
+        }
+
+        if (!existsSync(workspaceDir)) {
+          mkdirSync(workspaceDir, { recursive: true });
         }
 
         const { authStorage, modelRegistry } = userConfigManager.getUserContext(username);

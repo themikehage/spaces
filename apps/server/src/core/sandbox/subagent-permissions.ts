@@ -42,6 +42,12 @@ export const DEFAULT_SUBAGENT_PERMISSIONS: SubagentPermissionConfig = {
     // External search tools disabled by default for subagents
     { toolName: "web_fetch", pattern: "*", action: "deny", source: "agent-default" },
     { toolName: "exa_search", pattern: "*", action: "deny", source: "agent-default" },
+
+    // Preview tools
+    { toolName: "manage_preview", pattern: "status", action: "allow", source: "agent-default" },
+    { toolName: "manage_preview", pattern: "configure", action: "ask", source: "agent-default" },
+    { toolName: "manage_preview", pattern: "build", action: "ask", source: "agent-default" },
+    { toolName: "manage_preview", pattern: "abort", action: "allow", source: "agent-default" },
   ],
   excludedTools: [
     "manage_delegations",
@@ -180,6 +186,9 @@ export function extractSubject(toolName: string, args: Record<string, unknown>):
   if (toolName === "bash") return String(args.command ?? "");
   if (toolName === "write" || toolName === "read" || toolName === "edit") {
     return String(args.path ?? args.filepath ?? "");
+  }
+  if (toolName === "manage_preview") {
+    return String(args.action ?? "");
   }
   return JSON.stringify(args);
 }

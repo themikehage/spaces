@@ -3,7 +3,8 @@ import { apiFetch } from "@/lib/api";
 import { Button } from "@/components/ui/Button";
 import { EntityAvatar } from "@/components/shared/EntityAvatar";
 import { wsClient } from "@/lib/ws-client";
-import { Play, Shield, HelpCircle, Check, X, AlertTriangle, Send } from "lucide-react";
+import { Play, Shield, HelpCircle, Check, X, AlertTriangle, Send, Users } from "lucide-react";
+import { ProjectAssignmentModal } from "./ProjectAssignmentModal";
 
 interface ProjectFloorPanelProps {
   projectId: string | null;
@@ -45,6 +46,9 @@ export function ProjectFloorPanel({ projectId }: ProjectFloorPanelProps) {
   const [steerMessages, setSteerMessages] = useState<Record<string, string>>({});
   const [startingAgent, setStartingAgent] = useState<string | null>(null);
 
+  const [assignment, setAssignment] = useState<any>(null);
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
+
   const fetchProjectData = useCallback(async () => {
     if (!projectId) return;
     try {
@@ -55,6 +59,13 @@ export function ProjectFloorPanel({ projectId }: ProjectFloorPanelProps) {
         const data = await projRes.json();
         const found = data.projects?.find((p: any) => p.id === projectId);
         if (found) setProject(found);
+      }
+
+      // Fetch project assignment
+      const assignRes = await apiFetch(`/api/workspace-projects/${projectId}/assignment`).catch(() => null);
+      if (assignRes && assignRes.ok) {
+        const assignData = await assignRes.json();
+        setAssignment(assignData.assignment || null);
       }
 
       // Fetch project agents
@@ -271,6 +282,29 @@ export function ProjectFloorPanel({ projectId }: ProjectFloorPanelProps) {
             })}
           </div>
         </div>
+
+        {/* Dedicated Team Assignment Bar / Button */}
+        {projectId && (
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowAssignmentModal(true)}
+              className="flex items-center gap-2 px-3 py-1.5 bg-card/60 hover:bg-card border border-input/40 hover:border-primary/40 rounded-xl text-xs font-semibold text-foreground transition-all cursor-pointer shadow-sm relative group"
+              title="Configurar equipo asignado al proyecto"
+            >
+              <Users className="w-4 h-4 text-primary group-hover:scale-110 transition-transform" />
+              <span>Equipo</span>
+              {assignment?.leaderId && (
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Líder asignado activo" />
+              )}
+              {Array.isArray(assignment?.members) && assignment.members.length > 0 && (
+                <span className="px-1.5 py-0.5 bg-primary/20 text-primary font-bold text-[10px] rounded-full">
+                  {assignment.members.length}
+                </span>
+              )}
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Agents grid floor */}
@@ -455,6 +489,17 @@ export function ProjectFloorPanel({ projectId }: ProjectFloorPanelProps) {
           </div>
         )}
       </div>
+
+      {showAssignmentModal && projectId && (
+        <ProjectAssignmentModal
+          projectId={projectId}
+          projectName={project?.name}
+          onClose={() => {
+            setShowAssignmentModal(false);
+            fetchProjectData();
+          }}
+        />
+      )}
     </div>
   );
 }

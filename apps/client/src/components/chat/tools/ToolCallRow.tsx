@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 import { LsResult } from "./LsResult";
 import { FindResult } from "./FindResult";
 import { WriteResult } from "./WriteResult";
@@ -312,6 +314,17 @@ const TOOL_META: Record<string, { label: string; colorClass: string; icon: React
       </svg>
     ),
   },
+  manage_preview: {
+    label: "preview",
+    colorClass: "text-emerald-500",
+    icon: (
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+        <rect x="2" y="3" width="20" height="14" rx="2" ry="2" />
+        <line x1="8" y1="21" x2="16" y2="21" />
+        <line x1="12" y1="17" x2="12" y2="21" />
+      </svg>
+    ),
+  },
 };
 
 function getArgSummary(toolName: string, args: Record<string, unknown>, l: Record<string, string>): string {
@@ -376,6 +389,11 @@ function getArgSummary(toolName: string, args: Record<string, unknown>, l: Recor
       const obj = (args.objective as string) || "";
       return obj.length > 50 ? obj.slice(0, 50) + "…" : obj;
     }
+    case "manage_preview": {
+      const action = (args.action as string) || "status";
+      const fw = args.config ? ` (${(args.config as any).framework})` : "";
+      return `${action}${fw}`;
+    }
     default: {
       const keys = Object.keys(args || {});
       if (keys.length === 0) return "";
@@ -394,7 +412,7 @@ function getArgSummary(toolName: string, args: Record<string, unknown>, l: Recor
   }
 }
 
-function getResultSummary(toolName: string, result: ToolResultData, l: Record<string, string>): string {
+function getResultSummary(toolName: string, result: ToolResultData, l: Record<string, string>, args: Record<string, unknown>): string {
   const text = result.content.find(b => b.type === "text")?.text ?? "";
   if (result.isError) return "error";
   switch (toolName) {
@@ -450,6 +468,14 @@ function getResultSummary(toolName: string, result: ToolResultData, l: Record<st
     case "memory_store": return l.resStored;
     case "memory_forget": return l.resForgotten;
     case "decompose_tasks": return l.resDecomposed;
+    case "manage_preview": {
+      if (result.isError) return "error";
+      const action = (args.action as string) || "status";
+      if (action === "build") {
+        return text.includes("successfully") ? "build success" : "build failed";
+      }
+      return "completado";
+    }
     default: {
       const details = result.details as any;
       if (details?.ui) return "ui";
@@ -708,6 +734,84 @@ function ToolBody({
           <span>{text || "Custom tools metadata updated"}</span>
         </div>
       );
+    case "manage_preview": {
+      const action = (args.action as string) || "status";
+      const config = args.config as any;
+      const details = result?.details as any;
+      const previewPagePath = details?.previewPagePath;
+
+      return (
+        <div className="flex flex-col gap-3 p-4 rounded-xl bg-surface border border-border/80 shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-0.5">
+              <h4 className="text-sm font-bold text-text-primary capitalize">{action}</h4>
+            </div>
+            <div className="flex items-center gap-2">
+              {previewPagePath && (
+                <Link
+                  to={previewPagePath}
+                  className="px-2.5 py-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 hover:text-emerald-400 text-[11px] font-bold flex items-center gap-1 transition-all"
+                >
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg>
+                  Open Preview
+                </Link>
+              )}
+              {details?.config && (
+                <span className="px-2 py-0.5 rounded bg-bg text-text-secondary font-mono text-[10px]">
+                  {details.config.framework}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {config && (
+            <div className="grid grid-cols-2 gap-2 text-xs border border-border/30 rounded-lg p-2.5 bg-bg/40">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-text-secondary font-medium">Framework</span>
+                <span className="font-bold text-text-primary uppercase">{config.framework}</span>
+              </div>
+              {config.buildCommand && (
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-text-secondary font-medium">Build Command</span>
+                  <span className="font-mono text-text-primary truncate">{config.buildCommand}</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {details?.state && (
+            <div className="grid grid-cols-3 gap-2 text-[11px] border border-border/30 rounded-lg p-2.5 bg-bg/40 font-mono">
+              <div className="flex flex-col gap-0.5">
+                <span className="text-text-secondary">Status</span>
+                <span className="font-semibold text-text-primary">{details.state.status}</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-text-secondary">Dist Exists</span>
+                <span className={details.state.distExists ? "text-emerald-500 font-semibold" : "text-warning font-semibold"}>
+                  {details.state.distExists ? "Yes" : "No"}
+                </span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <span className="text-text-secondary">Index HTML</span>
+                <span className={details.state.indexHtmlExists ? "text-emerald-500 font-semibold" : "text-warning font-semibold"}>
+                  {details.state.indexHtmlExists ? "Yes" : "No"}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {text && (
+            <pre className="text-[11px] font-mono text-text-secondary whitespace-pre-wrap break-words bg-bg p-3 rounded-lg border border-border/40 max-h-48 overflow-y-auto">
+              {text}
+            </pre>
+          )}
+        </div>
+      );
+    }
     default: {
       const uiDef = (result?.details as any)?.ui || (args as any)?.ui;
       if (uiDef) {
@@ -787,6 +891,7 @@ export function ToolCallRow({
       toolName === "share_file" ||
       toolName === "spawn_subagent" ||
       toolName === "delegate_task" ||
+      toolName === "manage_delegations" ||
       toolName === "exa_search" ||
       toolName === "web_fetch" ||
       toolName === "memory_recall" ||
@@ -797,7 +902,7 @@ export function ToolCallRow({
   const hasUiDetails = (result?.details as any)?.ui || (args as any)?.ui;
   const meta = TOOL_META[toolName] ?? {
     label: toolName,
-    colorClass: "text-accent",
+    colorClass: "text-primary",
     icon: hasUiDetails ? (
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
@@ -841,7 +946,7 @@ export function ToolCallRow({
   } : null);
   const hasError = result?.isError ?? false;
   const argSummary = getArgSummary(toolName, args, l);
-  const resultSummary = activeResult ? getResultSummary(toolName, activeResult, l) : "";
+  const resultSummary = activeResult ? getResultSummary(toolName, activeResult, l, args) : "";
   const isFullBleed = toolName === "render_html" || toolName === "render_chart";
 
   return (

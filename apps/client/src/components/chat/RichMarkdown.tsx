@@ -41,7 +41,7 @@ export function RichMarkdown({ content }: Props) {
   const processedContent = useMemo(() => replaceWorkspacePathsWithLinks(content), [content]);
 
   return (
-    <div className="text-foreground max-w-none text-base md:text-sm leading-relaxed font-sans break-words">
+    <div className="text-foreground text-base md:text-sm leading-relaxed font-sans break-words">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         urlTransform={customUrlTransform}
@@ -54,7 +54,7 @@ export function RichMarkdown({ content }: Props) {
             if (inline) {
               return (
                 <code
-                  className="bg-card-hover/80 text-primary font-mono px-1.5 py-0.5 rounded text-xs"
+                  className="bg-card-hover/80 text-primary font-mono px-1.5 py-0.5 rounded text-xs overflow-x-auto"
                   {...props}
                 >
                   {children}

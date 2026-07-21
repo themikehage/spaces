@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { apiFetch } from "@/lib/api";
-import { getSessionPath as resolveSessionPath } from "@/lib/session-utils";
+import { buildCreateSessionBody, getSessionPath as resolveSessionPath } from "@/lib/session-utils";
 
 interface UseSessionActionsProps {
   activeProjectId?: string | null;
@@ -69,12 +69,11 @@ export function useSessionActions({
       const res = await apiFetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: "Nueva sesion",
-          projectName: activeProjectId || undefined,
-          agentId: activeAgent?.id || undefined,
-          teamId: activeTeam?.id || undefined,
-        }),
+        body: JSON.stringify(buildCreateSessionBody("Nueva sesion", {
+          activeProjectName: activeProjectId,
+          activeAgent,
+          activeTeam,
+        })),
       });
       if (!res.ok) return;
       const session = await res.json();

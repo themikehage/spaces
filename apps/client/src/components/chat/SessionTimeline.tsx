@@ -63,10 +63,11 @@ export function SessionTimeline({ messages, sessionCreatedAt }: SessionTimelineP
       const msg = messages[index];
       const timestamp = msg.timestamp || msg.createdAt || new Date().toISOString();
       const uniqueId = msg.id || `msg-${index}`;
+      const messageMilestoneId = `${uniqueId}-${index}`;
 
       if (msg.role === "user") {
         list.push({
-          id: uniqueId,
+          id: messageMilestoneId,
           type: "user_prompt",
           timestamp,
           title: "User Prompt",
@@ -78,7 +79,7 @@ export function SessionTimeline({ messages, sessionCreatedAt }: SessionTimelineP
 
         if (typeof content === "string") {
           list.push({
-            id: uniqueId,
+            id: messageMilestoneId,
             type: "assistant_response",
             timestamp,
             title: `Agent Response (${agentName})`,
@@ -86,7 +87,7 @@ export function SessionTimeline({ messages, sessionCreatedAt }: SessionTimelineP
           });
         } else if (Array.isArray(content)) {
           content.forEach((block, bIdx) => {
-            const blockId = `${uniqueId}-${bIdx}`;
+            const blockId = `${messageMilestoneId}-${bIdx}`;
             if (block.type === "thinking" && block.thinking) {
               list.push({
                 id: blockId,
@@ -99,7 +100,7 @@ export function SessionTimeline({ messages, sessionCreatedAt }: SessionTimelineP
               const res = toolResults.get(block.id);
               const status = res ? (res.isError ? "error" : "success") : "pending";
               list.push({
-                id: block.id || blockId,
+                id: `${blockId}-${block.id || "tool"}`,
                 type: "tool_call",
                 timestamp,
                 title: `Execute Tool: ${block.name}`,

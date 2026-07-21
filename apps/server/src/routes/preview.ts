@@ -53,9 +53,9 @@ function isAssetPath(path: string): boolean {
 
 const BUILD_DIRS = ["dist", "build", ".output"] as const;
 
-function resolveBuildDir(username: string, projectName: string): string | null {
-  const workspaceBase = getWorkspaceDir(username);
-  const projectDir = resolve(workspaceBase, "projects", projectName);
+function resolveBuildDir(username: string, projectName: string): string {
+  const resolved = resolveProjectDir(username, projectName);
+  const projectDir = resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, projectName);
   for (const dir of BUILD_DIRS) {
     const candidate = resolve(projectDir, dir);
     if (existsSync(candidate)) return candidate;
@@ -65,10 +65,21 @@ function resolveBuildDir(username: string, projectName: string): string | null {
 
 function validatePreviewPath(username: string, projectName: string, reqPath: string): string {
   const buildDir = resolveBuildDir(username, projectName);
-  if (!buildDir) throw new Error("No build directory found");
-
-  const normalized = normalize(reqPath || ".");
+  const cleanReqPath = (reqPath || ".").replace(/^[/\\]+/, "");
+  const normalized = normalize(cleanReqPath);
   const fullPath = resolve(buildDir, normalized);
+
+  if (existsSync(fullPath) && (fullPath === buildDir || fullPath.startsWith(buildDir + sep))) {
+    return fullPath;
+  }
+
+  // Fallback to raw project workspace if file is not found in buildDir
+  const resolved = resolveProjectDir(username, projectName);
+  const workspaceDir = resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, projectName);
+  const rawPath = resolve(workspaceDir, normalized);
+  if (existsSync(rawPath) && (rawPath === workspaceDir || rawPath.startsWith(workspaceDir + sep))) {
+    return rawPath;
+  }
 
   if (fullPath !== buildDir && !fullPath.startsWith(buildDir + sep)) {
     throw new Error("Path traversal detected");

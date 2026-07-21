@@ -191,6 +191,7 @@ async function handleProjects(action: string, id: string | undefined, params: an
       if (proj) {
         if (params.name !== undefined) proj.name = params.name;
         if (params.avatarUrl !== undefined) proj.avatarUrl = params.avatarUrl;
+        if (params.assignment !== undefined) proj.assignment = params.assignment;
         writeFileSync(join(existingPath, "project.json"), JSON.stringify(proj, null, 2), "utf-8");
         return ok(`Project "${id}" updated`, { entity: "projects", id, status: "updated", data: proj });
       }
@@ -208,6 +209,7 @@ async function handleProjects(action: string, id: string | undefined, params: an
       name: params.name,
       cloneUrl: params.cloneUrl ?? null,
       avatarUrl: params.avatarUrl ?? null,
+      assignment: params.assignment ?? null,
       createdAt: new Date().toISOString(),
     };
     writeFileSync(join(baseDir, "project.json"), JSON.stringify(projData, null, 2), "utf-8");
@@ -227,6 +229,79 @@ async function handleProjects(action: string, id: string | undefined, params: an
     }
 
     return ok(`Project "${params.name}" created`, { entity: "projects", id: projectId, status: "created", data: projData });
+  }
+
+  if (action === "assign") {
+    if (!id) return err("id (project name or ID) is required for assign");
+    const projPath = findProjectDir(username, id);
+    if (!projPath) return err(`Project "${id}" not found`);
+    const proj = readProjectJson(projPath);
+    if (!proj) return err(`Project "${id}" metadata could not be loaded`);
+
+    const currentAssignment = (proj.assignment as any) || { leaderId: null, members: [] };
+    const updatedAssignment = {
+      leaderId: params.leaderId !== undefined ? params.leaderId : currentAssignment.leaderId,
+      members: params.members !== undefined ? params.members : (currentAssignment.members || []),
+      updatedAt: new Date().toISOString(),
+    };
+
+    proj.assignment = updatedAssignment;
+    writeFileSync(join(projPath, "project.json"), JSON.stringify(proj, null, 2), "utf-8");
+
+    try {
+      const { broadcastToUser } = await import("../../ws/handler");
+      broadcastToUser(username, { type: "project_updated", project: { id: proj.id, ...proj } });
+    } catch {}
+
+    return ok(`Assignment updated for project "${id}"`, { entity: "projects", id, status: "assigned", data: proj });
+  }
+
+  if (action === "member") {
+    if (!id) return err("id (project name or ID) is required for member action");
+    const projPath = findProjectDir(username, id);
+    if (!projPath) return err(`Project "${id}" not found`);
+    const proj = readProjectJson(projPath);
+    if (!proj) return err(`Project "${id}" metadata could not be loaded`);
+
+    const agentId = params.agentId || params.id;
+    if (!agentId) return err("agentId is required in params for member action");
+
+    const currentAssignment = (proj.assignment as any) || { leaderId: null, members: [] };
+    let members: any[] = Array.isArray(currentAssignment.members) ? [...currentAssignment.members] : [];
+
+    const existingIndex = members.findIndex((m: any) => m.id === agentId);
+    const memberName = params.name || agentId;
+    const memberRole = params.role || "Member";
+
+    if (existingIndex >= 0) {
+      members[existingIndex] = {
+        ...members[existingIndex],
+        name: memberName,
+        role: memberRole,
+      };
+    } else {
+      members.push({
+        id: agentId,
+        name: memberName,
+        role: memberRole,
+      });
+    }
+
+    const updatedAssignment = {
+      ...currentAssignment,
+      members,
+      updatedAt: new Date().toISOString(),
+    };
+
+    proj.assignment = updatedAssignment;
+    writeFileSync(join(projPath, "project.json"), JSON.stringify(proj, null, 2), "utf-8");
+
+    try {
+      const { broadcastToUser } = await import("../../ws/handler");
+      broadcastToUser(username, { type: "project_updated", project: { id: proj.id, ...proj } });
+    } catch {}
+
+    return ok(`Member "${memberName}" updated on project "${id}"`, { entity: "projects", id, status: "member_updated", data: proj });
   }
 
   if (action === "delete") {
@@ -535,14 +610,14 @@ export function createFactoryTool(opts: FactoryToolOptions) {
     description: `Manage Spaces entities directly. Operations on agents, projects, sessions, environment variables, LLM providers, custom skills, teams, laboratory experiments, and settings.
 
 Available entities: agents, projects, sessions, env, providers, skills, teams, experiments, settings.
-Actions: get (list or read), upsert (create or update), delete (permanently remove), send (message dispatch to a team), member (add/update member of a team).
+Actions: get (list or read), upsert (create or update), delete (permanently remove), assign (set project assignment), send (message dispatch to a team), member (add/update member of a team/project).
 
 Entity-specific notes:
 - sessions: only get and delete. Sessions are created implicitly via chat.
 - env: uses "key" in params instead of "id" for upsert/delete. Keys are uppercase (e.g. GITHUB_TOKEN).
 - providers: upsert sets an API key, delete revokes it.
 - skills: upsert writes a SKILL.md file with frontmatter. Requires name, description, and content params.
-- projects: upsert can optionally clone a git repo via cloneUrl param.
+- projects: upsert can clone or update metadata. assign sets leaderId and members. member adds/updates assigned team members.
 - teams: upsert creates or updates teams, delete removes them, send sends a message to the team, and member manages team members.
 
 For exact parameter schemas, call GET /api/factory/contract/:entity.
@@ -558,8 +633,8 @@ After mutating any entity, call refresh_ui to update the frontend sidebar.`,
         },
         action: {
           type: "string",
-          enum: ["get", "upsert", "delete", "send", "member"],
-          description: "get: retrieve entity data (list or single). upsert: create or update. delete: permanently remove. send: dispatch message to a team. member: add/update a team member.",
+          enum: ["get", "upsert", "delete", "assign", "send", "member"],
+          description: "get: retrieve entity data (list or single). upsert: create or update. delete: permanently remove. assign: set project assignment (leaderId, members). send: dispatch message to a team. member: add/update a team/project member.",
         },
         id: {
           type: "string",

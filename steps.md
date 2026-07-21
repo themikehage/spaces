@@ -8,6 +8,13 @@
 - [x] Implementar el cliente React para proyectos, sesiones, agentes, equipos y workspace.
 - [x] Implementar la landing de producto.
 - [x] Incorporar gestión de archivos, preview, logs, backups, proveedores, skills, MCP, plugins y aprobaciones.
+- [x] Integrar 9 proveedores de IA: OpenAI, Google Gemini, xAI, DeepSeek, Groq, Mistral, OpenRouter, Qwen y OpenCodeGo.
+- [x] Implementar herramientas de generación de imágenes y video.
+- [x] Unificar orquestación de subagentes en `manage_delegations` (spawn + delegate).
+- [x] Implementar motor de permisos dinámico por usuario/sesión.
+- [x] Añadir herramientas de preview en vivo para proyectos HTML.
+- [x] Integrar formateo Markdown en mensajes del chat.
+- [x] Refactorizar tema visual con modo claro/oscuro completo.
 
 ## Próximo sprint: estabilización y calidad
 

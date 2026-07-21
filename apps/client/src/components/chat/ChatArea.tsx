@@ -14,6 +14,8 @@ import { useToast } from "@/contexts/ToastContext";
 import { getSessionPath, getSessionName, buildCreateSessionBody, getSessionMeta } from "@/lib/session-utils";
 import { FloatingTasks } from "./FloatingTasks";
 import { ChatSkeleton } from "@/components/skeletons/ChatSkeleton";
+import { ProjectAssignmentModal } from "@/components/projects/ProjectAssignmentModal";
+import { Users } from "lucide-react";
 
 const ALL_TOOL_NAMES = ["read", "write", "edit", "bash", "grep", "find", "ls"];
 
@@ -40,11 +42,12 @@ interface Message {
 interface Props {
   sessionId: string | null;
   activeProjectName: string | null;
+  activeProjectId?: string | null;
   activeAgent?: { id: string; name: string; avatarUrl?: string } | null;
   activeTeam?: { id: string; name: string } | null;
 }
 
-export function ChatArea({ sessionId, activeProjectName, activeAgent = null, activeTeam = null }: Props) {
+export function ChatArea({ sessionId, activeProjectName, activeProjectId = null, activeAgent = null, activeTeam = null }: Props) {
   const l = useLiterals(u);
   const navigate = useNavigate();
   const { addToast } = useToast();
@@ -56,6 +59,7 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
   const [serialTools, setSerialTools] = useState<string[]>(["request_approval", "ask_question"]);
   const [contextUsage, setContextUsage] = useState<ContextUsage | null>(null);
   const [settledApprovals, setSettledApprovals] = useState<Record<string, "confirm" | "deny">>({});
+  const [showAssignmentModal, setShowAssignmentModal] = useState(false);
 
 
 
@@ -490,7 +494,7 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
       unsubToolUpdate();
       unsubToolApproval();
     };
-  }, [sessionId, subscribe, loadMessages, navigate, activeTeam, activeAgent, activeProjectName]);
+  }, [sessionId, subscribe, loadMessages]);
 
   useEffect(() => {
     if (connected && !wasConnected && sessionId) {
@@ -653,6 +657,17 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
                 </span>
               )}
             </div>
+            {activeProjectId && (
+              <button
+                type="button"
+                onClick={() => setShowAssignmentModal(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1 bg-card/60 hover:bg-card border border-input/40 hover:border-primary/40 rounded-lg text-xs font-semibold text-foreground transition-all cursor-pointer shadow-sm group"
+                title="Manage project team"
+              >
+                <Users className="w-3.5 h-3.5 text-primary group-hover:scale-110 transition-transform" />
+                <span>Team</span>
+              </button>
+            )}
           </div>
         )}
 
@@ -788,6 +803,13 @@ export function ChatArea({ sessionId, activeProjectName, activeAgent = null, act
 
       </div>
 
+      {showAssignmentModal && activeProjectId && (
+        <ProjectAssignmentModal
+          projectId={activeProjectId}
+          projectName={activeProjectName || undefined}
+          onClose={() => setShowAssignmentModal(false)}
+        />
+      )}
     </div>
   );
 }

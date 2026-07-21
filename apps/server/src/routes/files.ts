@@ -7,7 +7,7 @@ import { sessionManager } from "../core/session-manager";
 import {
   getWorkspaceDir, getProjectsDir, getProjectWorkspaceDir,
   getAgentWorkspaceDir, getTeamWorkspaceDir,
-  getSessionDir, getUserDir
+  getSessionDir, getUserDir, UpdateProjectAssignmentSchema
 } from "shared";
 import { scopeConfigManager } from "../core/scope";
 import { applyCacheHeaders } from "../core/cache-headers";
@@ -147,10 +147,8 @@ function getRelativePath(c: any): string {
   let relativePath = "";
   if (c.req.path.startsWith(prefix)) {
     relativePath = c.req.path.substring(prefix.length);
-    if (relativePath.startsWith("/")) {
-      relativePath = relativePath.substring(1);
-    }
   }
+  relativePath = relativePath.replace(/^[/\\]+/, "");
   return decodeURIComponent(relativePath);
 }
 
@@ -592,6 +590,96 @@ filesRouter.delete("/workspace-projects/:id/avatar", async (c) => {
   writeFileSync(jsonPath, JSON.stringify(projectJson, null, 2), "utf-8");
 
   return c.json({ ok: true });
+});
+
+filesRouter.get("/workspace-projects/:id/assignment", async (c) => {
+  const username = getUsername(c);
+  if (!username) return c.json({ error: "Unauthorized" }, 401);
+  const id = c.req.param("id");
+
+  const projectsDir = getProjectsDir(username);
+  const projectPath = join(projectsDir, id);
+  const jsonPath = join(projectPath, "project.json");
+  if (!existsSync(projectPath) || !existsSync(jsonPath)) {
+    return c.json({ error: "Project not found" }, 404);
+  }
+
+  try {
+    const projectJson = JSON.parse(readFileSync(jsonPath, "utf-8"));
+    return c.json({ assignment: projectJson.assignment || null });
+  } catch (err: any) {
+    return c.json({ error: err.message || "Failed to load project assignment" }, 500);
+  }
+});
+
+filesRouter.put("/workspace-projects/:id/assignment", async (c) => {
+  const username = getUsername(c);
+  if (!username) return c.json({ error: "Unauthorized" }, 401);
+  const id = c.req.param("id");
+
+  const projectsDir = getProjectsDir(username);
+  const projectPath = join(projectsDir, id);
+  const jsonPath = join(projectPath, "project.json");
+  if (!existsSync(projectPath) || !existsSync(jsonPath)) {
+    return c.json({ error: "Project not found" }, 404);
+  }
+
+  try {
+    const body = await c.req.json().catch(() => ({}));
+    const parseResult = UpdateProjectAssignmentSchema.safeParse(body);
+    if (!parseResult.success) {
+      return c.json({ error: "Invalid assignment format", details: parseResult.error.format() }, 400);
+    }
+
+    const projectJson = JSON.parse(readFileSync(jsonPath, "utf-8"));
+    const currentAssignment = projectJson.assignment || { leaderId: null, members: [] };
+
+    const updatedAssignment = {
+      leaderId: parseResult.data.leaderId !== undefined ? parseResult.data.leaderId : currentAssignment.leaderId,
+      members: parseResult.data.members !== undefined ? parseResult.data.members : (currentAssignment.members || []),
+      updatedAt: new Date().toISOString(),
+    };
+
+    projectJson.assignment = updatedAssignment;
+    writeFileSync(jsonPath, JSON.stringify(projectJson, null, 2), "utf-8");
+
+    try {
+      const { broadcastToUser } = await import("../ws/handler");
+      broadcastToUser(username, { type: "project_updated", project: { id, ...projectJson } });
+    } catch {}
+
+    return c.json({ assignment: updatedAssignment });
+  } catch (err: any) {
+    return c.json({ error: err.message || "Failed to update project assignment" }, 500);
+  }
+});
+
+filesRouter.delete("/workspace-projects/:id/assignment", async (c) => {
+  const username = getUsername(c);
+  if (!username) return c.json({ error: "Unauthorized" }, 401);
+  const id = c.req.param("id");
+
+  const projectsDir = getProjectsDir(username);
+  const projectPath = join(projectsDir, id);
+  const jsonPath = join(projectPath, "project.json");
+  if (!existsSync(projectPath) || !existsSync(jsonPath)) {
+    return c.json({ error: "Project not found" }, 404);
+  }
+
+  try {
+    const projectJson = JSON.parse(readFileSync(jsonPath, "utf-8"));
+    projectJson.assignment = null;
+    writeFileSync(jsonPath, JSON.stringify(projectJson, null, 2), "utf-8");
+
+    try {
+      const { broadcastToUser } = await import("../ws/handler");
+      broadcastToUser(username, { type: "project_updated", project: { id, ...projectJson } });
+    } catch {}
+
+    return c.json({ ok: true });
+  } catch (err: any) {
+    return c.json({ error: err.message || "Failed to delete project assignment" }, 500);
+  }
 });
 
 filesRouter.post("/workspace/refresh", async (c) => {

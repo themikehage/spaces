@@ -43,6 +43,7 @@ export function resolveFileUrl(
   } else if (cleanPath.startsWith("workspace/")) {
     cleanPath = cleanPath.substring("workspace/".length);
   }
+  cleanPath = cleanPath.replace(/^[/\\]+/, "");
   const params = new URLSearchParams();
   if (opts?.project) params.append("project", opts.project);
   if (opts?.agentId) params.append("agentId", opts.agentId);

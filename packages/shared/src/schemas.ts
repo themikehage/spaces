@@ -54,7 +54,7 @@ export const AVAILABLE_TOOLS = [
   "read", "write", "edit", "bash", "grep", "find", "ls",
   "request_approval", "ask_question", "render_images", "render_chart", "render_html", "share_file", "refresh_ui",
   "manage_delegations", "exa_search", "web_fetch", "decompose_tasks", "update_task_status", "complete_task_list",
-  "memory_store", "memory_recall", "memory_forget", "create_experiment", "vision", "generate_image", "manage_factory", "manage_pipelines"
+  "memory_store", "memory_recall", "memory_forget", "create_experiment", "vision", "generate_image", "manage_factory", "manage_pipelines", "manage_preview"
 ] as const;
 export type ToolName = typeof AVAILABLE_TOOLS[number];
 
@@ -733,6 +733,26 @@ export type BenchmarkJudgeResult = z.infer<typeof BenchmarkJudgeResultSchema>;
 export const ProjectStatusSchema = z.enum(["planning", "running", "review", "done"]);
 export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
 
+export const ProjectAssignmentMemberSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  role: z.string(),
+});
+export type ProjectAssignmentMember = z.infer<typeof ProjectAssignmentMemberSchema>;
+
+export const ProjectAssignmentSchema = z.object({
+  leaderId: z.string().optional().nullable(),
+  members: z.array(ProjectAssignmentMemberSchema).default([]),
+  updatedAt: z.string().optional(),
+});
+export type ProjectAssignment = z.infer<typeof ProjectAssignmentSchema>;
+
+export const UpdateProjectAssignmentSchema = z.object({
+  leaderId: z.string().optional().nullable(),
+  members: z.array(ProjectAssignmentMemberSchema).optional(),
+});
+export type UpdateProjectAssignment = z.infer<typeof UpdateProjectAssignmentSchema>;
+
 export const ProjectSchema = z.object({
   id: z.string(),
   name: z.string(),
@@ -740,9 +760,11 @@ export const ProjectSchema = z.object({
   avatarUrl: z.string().nullable(),
   status: ProjectStatusSchema.default("planning"),
   createdAt: z.string(),
+  assignment: ProjectAssignmentSchema.optional().nullable(),
 });
 export type Project = z.infer<typeof ProjectSchema>;
 
 export const AutonomyLevelSchema = z.enum(["auto", "propose", "suggest"]);
 export type AutonomyLevel = z.infer<typeof AutonomyLevelSchema>;
+
 

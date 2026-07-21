@@ -15,6 +15,7 @@ import {
 import { DEFAULT_AGENTS_MD, DEFAULT_FACTORY_SKILLS } from "../default-factory-skills";
 import { userConfigManager } from "./user-config";
 import { sessionMetadataStore } from "./metadata-store";
+import { scopeConfigManager } from "../scope";
 
 export function getResolvedSkillPaths(cwd: string, username?: string): string[] {
   const paths: string[] = [];
@@ -146,6 +147,22 @@ export function resolveProjectDir(username: string, nameOrId: string): string | 
   return null;
 }
 
+export function resolveProjectId(username: string, nameOrId: string): string | null {
+  const projectsDir = getProjectsDir(username);
+  if (!existsSync(projectsDir)) return null;
+  const entries = readdirSync(projectsDir, { withFileTypes: true });
+  for (const entry of entries) {
+    if (!entry.isDirectory()) continue;
+    const projPath = join(projectsDir, entry.name);
+    const proj = readProjectJson(projPath);
+    if (proj && (proj.id === nameOrId || proj.name === nameOrId)) {
+      return entry.name;
+    }
+  }
+  return null;
+}
+
+
 export function resolveSessionWorkspace(
   username: string,
   sessionId: string,
@@ -159,17 +176,30 @@ export function resolveSessionWorkspace(
 
   const workspaceBase = getWorkspaceDir(username);
   let workspaceDir = workspaceBase;
+
+  let resolvedProjectId = projectId;
+  if (!resolvedProjectId && agentId) {
+    try {
+      const membership = scopeConfigManager.getAgentMembership(username, agentId);
+      if (membership?.type === "project") {
+        resolvedProjectId = membership.id;
+      }
+    } catch (e) {
+      console.error("[resolveSessionWorkspace] Failed to check agent membership:", e);
+    }
+  }
+
   if (teamId) {
     workspaceDir = getTeamWorkspaceDir(username, teamId);
-  } else if (agentId) {
-    workspaceDir = getAgentWorkspaceDir(username, agentId);
-  } else if (projectId) {
-    const resolved = resolveProjectDir(username, projectId);
+  } else if (resolvedProjectId) {
+    const resolved = resolveProjectDir(username, resolvedProjectId);
     if (resolved) {
       workspaceDir = join(resolved, "workspace");
     } else {
-      workspaceDir = getProjectWorkspaceDir(username, projectId);
+      workspaceDir = getProjectWorkspaceDir(username, resolvedProjectId);
     }
+  } else if (agentId) {
+    workspaceDir = getAgentWorkspaceDir(username, agentId);
   }
 
   if (!existsSync(workspaceDir)) {
@@ -192,13 +222,24 @@ export function resolveSessionAllowedWriteDir(username: string, sessionId: strin
   if (metadata.teamId) {
     return getTeamWorkspaceDir(username, metadata.teamId);
   }
+
+  let resolvedProjectId = metadata.projectId ?? metadata.projectName;
+  if (!resolvedProjectId && metadata.agentId) {
+    try {
+      const membership = scopeConfigManager.getAgentMembership(username, metadata.agentId);
+      if (membership?.type === "project") {
+        resolvedProjectId = membership.id;
+      }
+    } catch {}
+  }
+
+  if (resolvedProjectId) {
+    const resolved = resolveProjectDir(username, resolvedProjectId);
+    return resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, resolvedProjectId);
+  }
+
   if (metadata.agentId) {
     return getAgentWorkspaceDir(username, metadata.agentId);
-  }
-  const projectId = metadata.projectId ?? metadata.projectName;
-  if (projectId) {
-    const resolved = resolveProjectDir(username, projectId);
-    return resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, projectId);
   }
 
   return getUserDir(username);

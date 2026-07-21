@@ -5,6 +5,7 @@ import { literals as u } from "./ProjectSettingsModal.literals";
 import { Button } from "@/components/ui/Button";
 import { AvatarUploadField } from "@/components/shared/AvatarUploadField";
 import { DEFAULT_AVATAR_PREFIX, isDefaultAvatar } from "@/lib/defaultAvatars";
+import { ProjectAssignmentPanel } from "./ProjectAssignmentPanel";
 
 interface Project {
   id: string;
@@ -252,6 +253,10 @@ export function ProjectSettingsModal({
                 />
               </div>
             )}
+
+            <div className="pt-2">
+              <ProjectAssignmentPanel projectId={project.id} />
+            </div>
 
             {error && (
               <div className="p-3 bg-error/10 border border-error/20 text-error rounded-xl text-xs font-semibold">

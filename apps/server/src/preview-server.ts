@@ -96,6 +96,7 @@ function htmlHeaders(contentType: string): Record<string, string> {
     "Content-Type": contentType,
     "Cache-Control": "no-cache, no-store, must-revalidate",
     "Access-Control-Allow-Origin": "*",
+    "Referrer-Policy": "same-origin",
     "Content-Security-Policy":
       "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline' https: http:; img-src * data: blob:; font-src 'self' data: https: http:; connect-src *; frame-src *;",
   };
@@ -113,23 +114,58 @@ export async function handleRequest(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const parts = url.pathname.split("/").filter(Boolean);
 
-  if (parts.length < 2) {
-    return new Response("Not Found", { status: 404 });
-  }
+  let username: string;
+  let project: string;
+  let filePath: string;
 
-  const username = decodeURIComponent(parts[0]);
-  const project = decodeURIComponent(parts[1]);
-  const filePath = parts.slice(2).join("/") || "index.html";
+  if (parts.length >= 2) {
+    username = decodeURIComponent(parts[0]);
+    project = decodeURIComponent(parts[1]);
+    filePath = parts.slice(2).join("/") || "index.html";
+  } else {
+    // Absolute-path asset request (e.g. /assets/logo-xxx.png) emitted by Vite bundles.
+    // The browser resolves absolute paths from the origin root, ignoring <base href>.
+    // Use the Referer header to identify the active username/project context.
+    const referer = req.headers.get("referer") || req.headers.get("Referer") || "";
+    let refUsername = "";
+    let refProject = "";
+    if (referer) {
+      try {
+        const refUrl = new URL(referer);
+        const refParts = refUrl.pathname.split("/").filter(Boolean);
+        if (refParts.length >= 2) {
+          refUsername = decodeURIComponent(refParts[0]);
+          refProject = decodeURIComponent(refParts[1]);
+        }
+      } catch {}
+    }
+    if (!refUsername || !refProject) {
+      return new Response("Not Found", { status: 404 });
+    }
+    username = refUsername;
+    project = refProject;
+    filePath = parts.join("/") || "index.html";
+  }
 
   if (username.includes("..") || project.includes("..") || filePath.includes("..")) {
     return new Response("Bad Request", { status: 400 });
   }
 
   const buildDir = resolveBuildDir(username, project);
-  const normalized = normalize(filePath);
-  const fullPath = resolve(buildDir, normalized);
+  const cleanFilePath = filePath.replace(/^[/\\]+/, "");
+  const normalized = normalize(cleanFilePath);
+  let fullPath = resolve(buildDir, normalized);
 
-  if (fullPath !== buildDir && !fullPath.startsWith(buildDir + sep)) {
+  if (!existsSync(fullPath)) {
+    const resolved = resolveProjectDir(username, project);
+    const workspaceDir = resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, project);
+    const rawPath = resolve(workspaceDir, normalized);
+    if (existsSync(rawPath) && (rawPath === workspaceDir || rawPath.startsWith(workspaceDir + sep))) {
+      fullPath = rawPath;
+    }
+  }
+
+  if (fullPath !== buildDir && !fullPath.startsWith(buildDir + sep) && !existsSync(fullPath)) {
     return new Response("Forbidden", { status: 403 });
   }
 

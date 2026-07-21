@@ -78,12 +78,19 @@ describe("Dynamic Workspaces & Permissions Tests", () => {
   it("should check permissions dynamically based on allowedWriteDir", () => {
     const allowedDir = join(userDir, "agents", "my-agent", "workspace");
 
-    // Escribir dentro de allowedWriteDir
+    // Escribir dentro de allowedWriteDir (ruta absoluta)
     const verdictInside = permissionEngine.evaluate("write", { path: join(allowedDir, "src", "index.ts") }, {
       allowedWriteDir: allowedDir,
       executionMode: "standard",
     });
     expect(verdictInside.allow).toBe(true);
+
+    // Escribir dentro de allowedWriteDir (ruta relativa como "src/App.jsx")
+    const verdictRelativeInside = permissionEngine.evaluate("edit", { path: "src/App.jsx" }, {
+      allowedWriteDir: allowedDir,
+      executionMode: "standard",
+    });
+    expect(verdictRelativeInside.allow).toBe(true);
 
     // Escribir en temp (/tmp)
     const verdictTemp = permissionEngine.evaluate("edit", { path: "/tmp/somefile.txt" }, {
@@ -98,6 +105,13 @@ describe("Dynamic Workspaces & Permissions Tests", () => {
       executionMode: "standard",
     });
     expect(verdictOutside.allow).toBe("ask");
+
+    // Escribir fuera de allowedWriteDir con ruta relativa traversal ("../outside.ts")
+    const verdictRelativeOutside = permissionEngine.evaluate("write", { path: "../outside.ts" }, {
+      allowedWriteDir: allowedDir,
+      executionMode: "standard",
+    });
+    expect(verdictRelativeOutside.allow).toBe("ask");
 
     // Escribir fuera de allowedWriteDir en modo autonomous (debe permitir autónomamente)
     const verdictOutsideAuto = permissionEngine.evaluate("write", { path: join(userDir, "other-agent", "index.ts") }, {

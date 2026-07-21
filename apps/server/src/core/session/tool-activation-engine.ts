@@ -48,6 +48,7 @@ export function resolveActiveTools({
     "bash",
     "exa_search",
     "web_fetch",
+    "manage_preview",
     ...alwaysOnTools,
     ...customToolNames,
   ]);

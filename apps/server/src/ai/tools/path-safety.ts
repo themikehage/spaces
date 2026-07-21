@@ -6,7 +6,14 @@ import { resolve, relative, isAbsolute } from "node:path";
  */
 export function resolveSafePath(workspaceDir: string, targetPath: string): string {
   const resolved = resolve(workspaceDir, targetPath);
-  const rel = relative(workspaceDir, resolved);
+  
+  const absWorkspace = resolve(workspaceDir);
+  const absResolved = resolve(resolved);
+  
+  // Normalize both paths to lowercase to make the safety check case-insensitive.
+  // This is particularly important on Windows, but also safeguards against environment quirks.
+  const rel = relative(absWorkspace.toLowerCase(), absResolved.toLowerCase());
+  
   if (rel.startsWith("..") || isAbsolute(rel)) {
     throw new Error(`Access Denied: Path "${targetPath}" resolves outside of workspace.`);
   }

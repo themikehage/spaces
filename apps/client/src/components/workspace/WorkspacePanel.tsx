@@ -27,7 +27,7 @@ export function WorkspacePanel({ activeProjectName, activeAgentId = null, active
 
   // Helper centralizado para construir las URLs con scoping de repositorio/agente/canal/equipo
   const getWorkspaceUrl = useCallback((path: string) => {
-    const base = `/api/workspace/${path}`;
+    const base = `/api/workspace/${path.replace(/^\/+/, "")}`;
     const params = new URLSearchParams();
     if (activeProjectName) params.append("project", activeProjectName);
     if (activeAgentId) params.append("agentId", activeAgentId);

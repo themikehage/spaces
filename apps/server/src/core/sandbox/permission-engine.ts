@@ -1,5 +1,5 @@
 import { buildSubagentRules, evaluateSubagentRules } from "./subagent-permissions";
-import { resolve, sep } from "node:path";
+import { resolve, sep, isAbsolute } from "node:path";
 import { tmpdir } from "node:os";
 
 export type PermissionVerdict =
@@ -129,8 +129,10 @@ const SUBAGENT_DENY_RULES: PermissionRule[] = [
 export class PermissionEngine {
   isSubpath(parent: string, child: string): boolean {
     try {
-      const parentNormalized = resolve(parent).toLowerCase() + sep;
-      const childNormalized = resolve(child).toLowerCase() + sep;
+      const parentResolved = resolve(parent);
+      const parentNormalized = parentResolved.toLowerCase() + (parentResolved.endsWith(sep) ? "" : sep);
+      const resolvedChild = isAbsolute(child) ? resolve(child) : resolve(parentResolved, child);
+      const childNormalized = resolvedChild.toLowerCase() + (resolvedChild.endsWith(sep) ? "" : sep);
       return childNormalized.startsWith(parentNormalized);
     } catch {
       return false;

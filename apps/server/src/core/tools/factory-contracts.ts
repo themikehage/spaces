@@ -107,12 +107,30 @@ export const FACTORY_CONTRACTS: Record<string, EntityContract> = {
         },
       },
       upsert: {
-        description: "Create a new project (empty or clone) or update project name",
+        description: "Create a new project (empty or clone) or update project metadata/assignment",
         params: {
           id: { type: "string", required: true, description: "Project name (used as workspace identifier)" },
           name: { type: "string", required: true, description: "Project name" },
           cloneUrl: { type: "string", required: false, description: "Git URL to clone. Omit to create empty project. Only used on creation." },
           avatarUrl: { type: "string", required: false, description: "URL or default: prefix for project avatar image" },
+          assignment: { type: "object", required: false, description: "Project agent assignment object: { leaderId, members }" },
+        },
+      },
+      assign: {
+        description: "Assign a leader agent and team members to a project",
+        params: {
+          id: { type: "string", required: true, description: "Project UUID or name" },
+          leaderId: { type: "string", required: false, description: "Leader agent ID" },
+          members: { type: "array", required: false, description: "Array of { id, name, role }" },
+        },
+      },
+      member: {
+        description: "Add or update an assigned team member on a project",
+        params: {
+          id: { type: "string", required: true, description: "Project UUID or name" },
+          agentId: { type: "string", required: true, description: "Agent ID to assign as team member" },
+          name: { type: "string", required: false, description: "Display name snapshot" },
+          role: { type: "string", required: false, description: "Member role (e.g. Frontend, QA, Backend)" },
         },
       },
       delete: {

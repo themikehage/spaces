@@ -414,6 +414,7 @@ export function createWsContext(): WsConnectionContext {
             "memory_recall",
             "memory_forget",
             "create_experiment",
+            "manage_preview",
           ]);
 
           const mcpActive = currentActive.filter((tName) => tName.startsWith("mcp_"));

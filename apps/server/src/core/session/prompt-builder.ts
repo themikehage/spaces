@@ -88,6 +88,36 @@ export class SessionPromptBuilder {
               `You have a dedicated tool to interact with the preview system: \`manage_preview\` (supporting actions 'status', 'configure', 'build', and 'abort').\n` +
               `Always run a build using \`manage_preview(action: "build")\` rather than manual bash scripts when you modify frontend assets (e.g. React/Vite/Next.js/Astro) so that the user's browser updates in real time, and logs are displayed in the workspace UI.`
             );
+
+            if (projectMeta.assignment) {
+              const { assignment } = projectMeta;
+              if (assignment.leaderId) {
+                try {
+                  const { agentRegistry } = await import("../../agents");
+                  const leaderEntry = agentRegistry.get(assignment.leaderId, username);
+                  if (leaderEntry?.server.definition.systemPrompt) {
+                    appendPrompts.push(
+                      `\n\n## Project Lead Agent Persona & Directives\n` +
+                      `This project has an assigned Lead Agent (${leaderEntry.server.definition.name || assignment.leaderId}). Incorporate the following lead instructions into your reasoning and execution:\n\n` +
+                      leaderEntry.server.definition.systemPrompt
+                    );
+                  }
+                } catch (err) {
+                  console.error("[PromptBuilder] Failed to load leader agent prompt:", err);
+                }
+              }
+
+              if (Array.isArray(assignment.members) && assignment.members.length > 0) {
+                const roster = assignment.members
+                  .map((m: { id: string; name: string; role: string }) => `- **${m.name}** (ID: \`${m.id}\`, Role: ${m.role})`)
+                  .join("\n");
+                appendPrompts.push(
+                  `\n\n## Project Assigned Team Roster\n` +
+                  `The following team members are assigned to work on this project:\n` +
+                  roster
+                );
+              }
+            }
           }
         }
       } catch (e) {

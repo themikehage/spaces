@@ -383,7 +383,7 @@ Use 'delegate' to delegate to a specific target.`,
                 undefined,
                 targetId,
                 undefined,
-                inheritedWorkspaceDir ? { workspaceDir: inheritedWorkspaceDir } : undefined
+                { workspaceDir: inheritedWorkspaceDir || workspaceDir }
               );
 
               let resolvedModel = parentModel || null;

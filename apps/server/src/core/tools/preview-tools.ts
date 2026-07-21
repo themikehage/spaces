@@ -1,6 +1,8 @@
 import { loadPreviewConfig, savePreviewConfig } from "../preview-config";
 import { getPreviewState } from "../preview-watcher";
 import { runBuild, abortBuild } from "../preview-builder";
+import { resolveProjectId } from "../session/workspace-resolver";
+
 
 export interface ManagePreviewArgs {
   action: "status" | "configure" | "build" | "abort";
@@ -50,12 +52,18 @@ export function createPreviewTools(username: string, projectName: string) {
       execute: async (toolCallId: string, rawArgs: unknown) => {
         try {
           const args = rawArgs as ManagePreviewArgs;
+          const projectId = resolveProjectId(username, projectName) || projectName;
+          const previewPagePath = `/projects/${projectId}/preview`;
+
           switch (args.action) {
             case "status": {
               const state = getPreviewState(username, projectName);
               return {
-                content: [{ type: "text", text: JSON.stringify(state, null, 2) }],
-                details: { state }
+                content: [{
+                  type: "text",
+                  text: `Preview Page: ${previewPagePath}\n\n` + JSON.stringify(state, null, 2)
+                }],
+                details: { state, previewPagePath, projectId }
               };
             }
             case "configure": {
@@ -72,7 +80,7 @@ export function createPreviewTools(username: string, projectName: string) {
               });
               return {
                 content: [{ type: "text", text: `Preview configuration updated: ${JSON.stringify(saved, null, 2)}` }],
-                details: { config: saved }
+                details: { config: saved, previewPagePath, projectId }
               };
             }
             case "build": {
@@ -81,24 +89,25 @@ export function createPreviewTools(username: string, projectName: string) {
               return {
                 content: [{
                   type: "text",
-                  text: result.success
+                  text: (result.success
                     ? `Build completed successfully (exit code ${result.exitCode}).`
-                    : `Build failed with exit code ${result.exitCode}.`
+                    : `Build failed with exit code ${result.exitCode}.`) +
+                    ` You can view the live preview here: ${previewPagePath}`
                 }],
-                details: result
+                details: { ...result, previewPagePath, projectId }
               };
             }
             case "abort": {
               abortBuild(username, projectName);
               return {
                 content: [{ type: "text", text: "Build abort signal sent." }],
-                details: { aborted: true }
+                details: { aborted: true, previewPagePath, projectId }
               };
             }
             default:
               return {
                 content: [{ type: "text", text: `Error: Unknown action '${args.action}'` }],
-                details: { error: `Invalid action: ${args.action}` }
+                details: { error: `Invalid action: ${args.action}`, previewPagePath, projectId }
               };
           }
         } catch (e) {

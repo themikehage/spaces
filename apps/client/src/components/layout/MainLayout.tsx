@@ -383,7 +383,7 @@ export function MainLayout({
     children
   );
 
-  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "org" || page === "delegations" || page === "timeline" || page === "floor";
+  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "org" || page === "delegations" || page === "timeline";
   const showNewSessionButton = !isHome && isContextView;
 
   const isNegotiationTeam = activeTeamData?.teamType === "Negotiation";
@@ -448,19 +448,6 @@ export function MainLayout({
 
     if (activeProjectName || activeProjectId) {
       list.push(
-        {
-          id: "floor",
-          label: "Floor",
-          path: basePath ? `${basePath}/floor` : "/floor",
-          icon: (
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="7" height="9" rx="1" />
-              <rect x="14" y="3" width="7" height="5" rx="1" />
-              <rect x="14" y="12" width="7" height="9" rx="1" />
-              <rect x="3" y="16" width="7" height="5" rx="1" />
-            </svg>
-          ),
-        },
         {
           id: "preview",
           label: l.tabPreview,
