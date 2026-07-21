@@ -1,6 +1,6 @@
 import { Hono } from "hono";
 import { loadSkills } from "../ai/load-skills";
-import { existsSync, writeFileSync, mkdirSync } from "node:fs";
+import { existsSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
 import { authMiddleware, getAuthPayload } from "../middleware/auth";
 import { getResolvedSkillPaths } from "../core/session-manager";
 import { join } from "node:path";
@@ -47,6 +47,26 @@ skillsRouter.post("/reset", async (c) => {
     const userDir = getUserDir(username);
     const workspaceDir = join(userDir, "workspace");
     const skillsBaseDir = join(workspaceDir, ".agents", "skills");
+
+    const OBSOLETE_SKILLS = [
+      "factory-skills",
+      "factory-providers",
+      "factory-env",
+      "factory-integrations",
+      "factory-projects",
+      "factory-agents",
+      "factory-channels",
+      "factory-observe",
+      "factory-quick-actions",
+      "factory-sessions",
+    ];
+
+    for (const obsolete of OBSOLETE_SKILLS) {
+      const obsoleteDir = join(skillsBaseDir, obsolete);
+      if (existsSync(obsoleteDir)) {
+        rmSync(obsoleteDir, { recursive: true, force: true });
+      }
+    }
 
     for (const [skillKey, skillDef] of Object.entries(DEFAULT_FACTORY_SKILLS)) {
       const skillDir = join(skillsBaseDir, skillKey);
