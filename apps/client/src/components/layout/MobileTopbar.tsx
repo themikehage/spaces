@@ -42,7 +42,7 @@ export function MobileTopbar({
         {isHome ? (
           <div className="flex items-center gap-2">
             <Logo size={20} className="w-[20px] h-[20px]" />
-            <span className="text-base font-semibold text-foreground">{l.breadFactory || "Factory"}</span>
+            <span className="text-base font-semibold text-foreground">{l.breadFactory || "Spaces"}</span>
           </div>
         ) : (
           <h1 className="text-base font-semibold text-foreground truncate max-w-[200px]">
@@ -53,11 +53,10 @@ export function MobileTopbar({
 
       <div className="flex items-center gap-1.5 flex-shrink-0">
         <span
-          className={`w-2 h-2 rounded-full mr-1 flex-shrink-0 ${
-            wsState === "connected" ? "bg-success" :
-            wsState === "connecting" ? "bg-warning animate-pulse" :
-            "bg-error"
-          }`}
+          className={`w-2 h-2 rounded-full mr-1 flex-shrink-0 ${wsState === "connected" ? "bg-success" :
+              wsState === "connecting" ? "bg-warning animate-pulse" :
+                "bg-error"
+            }`}
           title={`WebSocket: ${wsState}`}
         />
         <button

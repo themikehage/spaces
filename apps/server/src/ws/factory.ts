@@ -19,7 +19,8 @@ function getProjectNameForSession(username: string, sessionId: string): string |
   const p = getSessionMetadataPath(username, sessionId);
   if (existsSync(p)) {
     try {
-      return JSON.parse(readFileSync(p, "utf-8")).projectName;
+      const meta = JSON.parse(readFileSync(p, "utf-8"));
+      return meta.projectId ?? meta.projectName;
     } catch {}
   }
 }

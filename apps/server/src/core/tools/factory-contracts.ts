@@ -137,8 +137,8 @@ export const FACTORY_CONTRACTS: Record<string, EntityContract> = {
       upsert: {
         description: "Update factory identity settings (name, avatar URL, system prompt)",
         params: {
-          factoryName: { type: "string", required: false, description: "Display name for the Factory" },
-          factoryAvatarUrl: { type: "string", required: false, description: "URL or default: prefix for the Factory avatar image" },
+          factoryName: { type: "string", required: false, description: "Display name for the Spaces" },
+          factoryAvatarUrl: { type: "string", required: false, description: "URL or default: prefix for the Spaces avatar image" },
           factorySystemPrompt: { type: "string", required: false, description: "Custom system prompt injected into all global sessions" },
         },
       },

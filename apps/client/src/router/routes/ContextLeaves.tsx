@@ -8,6 +8,7 @@ import { TimelineTabPanel } from "@/components/chat/TimelineTabPanel";
 import { TeamDetailPage } from "@/pages/TeamDetailPage";
 import { TeamOrgPage } from "@/pages/TeamOrgPage";
 import { useWorkspaceContext } from "@/hooks/useWorkspaceContext";
+import { ProjectFloorPanel } from "@/components/projects/ProjectFloorPanel";
 
 function sessionFromSplat(splat: string | undefined, suffix = ""): string | null {
   const value = splat?.replace(new RegExp(`${suffix}$`), "") ?? "";
@@ -67,4 +68,9 @@ export function TeamOrgRoute() {
   const { teamId = "" } = useParams();
   const navigate = useNavigate();
   return <TeamOrgPage teamId={teamId} onNavigate={navigate} />;
+}
+
+export function ProjectFloorRoute() {
+  const { activeProjectId } = useWorkspaceContext();
+  return <ProjectFloorPanel projectId={activeProjectId} />;
 }

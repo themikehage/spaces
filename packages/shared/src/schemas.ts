@@ -18,7 +18,7 @@ export const SessionSchema = z.object({
   updatedAt: z.string(),
   messageCount: z.number(),
   status: SessionStatusSchema.optional(),
-  projectName: z.string().optional(),
+  projectId: z.string().optional(),
   agentId: z.string().optional(),
   channelId: z.string().optional(),
   teamId: z.string().optional(),
@@ -37,7 +37,7 @@ export const SessionSchema = z.object({
 
 export const CreateSessionSchema = z.object({
   name: z.string().min(1).max(100),
-  projectName: z.string().optional(),
+  projectId: z.string().optional(),
   agentId: z.string().optional(),
   channelId: z.string().optional(),
   teamId: z.string().optional(),
@@ -61,6 +61,7 @@ export type ToolName = typeof AVAILABLE_TOOLS[number];
 export const ToolPermissionsSchema = z.object({
   tools: z.array(z.string().min(1)),
   executionMode: z.enum(["readonly", "standard", "autonomous"]).optional(),
+  autonomyLevel: z.enum(["auto", "propose", "suggest"]).optional(),
 });
 export type ToolPermissions = z.infer<typeof ToolPermissionsSchema>;
 
@@ -728,3 +729,20 @@ export const BenchmarkJudgeResultSchema = z.object({
   }),
 });
 export type BenchmarkJudgeResult = z.infer<typeof BenchmarkJudgeResultSchema>;
+
+export const ProjectStatusSchema = z.enum(["planning", "running", "review", "done"]);
+export type ProjectStatus = z.infer<typeof ProjectStatusSchema>;
+
+export const ProjectSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  cloneUrl: z.string().nullable(),
+  avatarUrl: z.string().nullable(),
+  status: ProjectStatusSchema.default("planning"),
+  createdAt: z.string(),
+});
+export type Project = z.infer<typeof ProjectSchema>;
+
+export const AutonomyLevelSchema = z.enum(["auto", "propose", "suggest"]);
+export type AutonomyLevel = z.infer<typeof AutonomyLevelSchema>;
+

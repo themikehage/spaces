@@ -9,7 +9,7 @@ export interface SessionContext {
 
 export interface CreateSessionBody {
   name: string;
-  projectName?: string;
+  projectId?: string;
   agentId?: string;
   teamId?: string;
 }
@@ -50,7 +50,7 @@ export function buildCreateSessionBody(
     case "agent":
       return { name: sessionName, agentId: resolved.id };
     case "project":
-      return { name: sessionName, projectName: resolved.id };
+      return { name: sessionName, projectId: resolved.id };
     case "global":
       return { name: sessionName };
   }
@@ -58,7 +58,7 @@ export function buildCreateSessionBody(
 
 export function getSessionContextPredicate(
   context: SessionContext
-): (session: { projectName?: string; agentId?: string; teamId?: string; experimentId?: string }) => boolean {
+): (session: { projectId?: string; agentId?: string; teamId?: string; experimentId?: string }) => boolean {
   const resolved = resolveContext(context);
   return (session) => {
     switch (resolved.type) {
@@ -71,12 +71,12 @@ export function getSessionContextPredicate(
         return session.agentId === resolved.id && !session.teamId;
       case "project":
         return (
-          session.projectName === resolved.id &&
+          session.projectId === resolved.id &&
           !session.agentId &&
           !session.teamId
         );
       case "global":
-        return !session.projectName && !session.agentId && !session.teamId;
+        return !session.projectId && !session.agentId && !session.teamId;
     }
   };
 }

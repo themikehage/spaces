@@ -203,7 +203,7 @@ export function TeamMessageList({
             <MessageList
               messages={mappedMessages}
               sessionId={sessionId}
-              activeChannelId={activeTeamId}
+              activeTeamId={activeTeamId}
               onOpenSubagentConsole={onOpenSubagentConsole}
             />
           )}

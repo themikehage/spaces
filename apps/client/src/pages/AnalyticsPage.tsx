@@ -104,7 +104,7 @@ export function AnalyticsPage() {
       const params = new URLSearchParams();
       if (from) params.append("from", from);
       if (to) params.append("to", to);
-      if (selectedProject) params.append("projectName", selectedProject);
+      if (selectedProject) params.append("projectId", selectedProject);
       if (selectedAgent) params.append("agentId", selectedAgent);
       if (selectedTeam) params.append("teamId", selectedTeam);
 

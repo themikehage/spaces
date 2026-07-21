@@ -113,6 +113,18 @@ export class SessionMetadataStore {
     return undefined;
   }
 
+  setAutonomyLevel(username: string, sessionId: string, level: "auto" | "propose" | "suggest"): void {
+    this.saveSessionMetadata(username, sessionId, { autonomyLevel: level });
+  }
+
+  getAutonomyLevel(username: string, sessionId: string): "auto" | "propose" | "suggest" {
+    const metadata = this.getSessionMetadata(username, sessionId);
+    if (metadata && (metadata.autonomyLevel === "auto" || metadata.autonomyLevel === "propose" || metadata.autonomyLevel === "suggest")) {
+      return metadata.autonomyLevel;
+    }
+    return "auto";
+  }
+
   computeAndPersistMetrics(username: string, sessionId: string, session: any): void {
     const metadata = this.getSessionMetadata(username, sessionId) || {};
     const createdAt = metadata.createdAt ? new Date(metadata.createdAt) : new Date();

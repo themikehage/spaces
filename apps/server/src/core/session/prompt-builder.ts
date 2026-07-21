@@ -16,7 +16,7 @@ export interface BuildPromptsParams {
   agentDef?: { name: string; role: string; systemPrompt: string };
   cachedMcpToolNames: string[];
   experimentId?: string;
-  projectName?: string;
+  projectId?: string;
 }
 
 export class SessionPromptBuilder {
@@ -41,7 +41,7 @@ export class SessionPromptBuilder {
     });
 
     if (!agentDef && settings.factorySystemPrompt) {
-      appendPrompts.push(`\n\n## Custom Factory Instructions:\n${settings.factorySystemPrompt}`);
+      appendPrompts.push(`\n\n## Custom Spaces Instructions:\n${settings.factorySystemPrompt}`);
     }
 
     if (sessionId.startsWith(SessionPrefix.DELEGATE)) {
@@ -58,9 +58,9 @@ export class SessionPromptBuilder {
       );
     }
 
-    if (params.projectName) {
+    if (params.projectId) {
       try {
-        const projectDir = resolveProjectDir(username, params.projectName);
+        const projectDir = resolveProjectDir(username, params.projectId);
         if (projectDir) {
           const projectJsonPath = join(projectDir, "project.json");
           if (existsSync(projectJsonPath)) {

@@ -3,7 +3,7 @@ import { AppRouter } from "@/components/layout/AppRouter";
 import { McpRedirectRoute } from "@/router/routes/McpRedirectRoute";
 import { NotFoundRoute } from "@/router/routes/NotFoundRoute";
 import { AgentsRoute, DashboardRoute, LogsRoute, PluginsRoute, ProjectsRoute, SessionsRoute, SettingsRoute, SkillsRoute, TeamsRoute, AnalyticsRoute } from "@/router/routes/AdministrativeLeaves";
-import { ChatRoute, DelegationsRoute, PreviewRoute, SessionRoute, TeamDetailRoute, TeamOrgRoute, WorkspaceRoute, TimelineRoute } from "@/router/routes/ContextLeaves";
+import { ChatRoute, DelegationsRoute, PreviewRoute, SessionRoute, TeamDetailRoute, TeamOrgRoute, WorkspaceRoute, TimelineRoute, ProjectFloorRoute } from "@/router/routes/ContextLeaves";
 
 export function AppRoutes() {
   return <Routes>
@@ -22,6 +22,7 @@ export function AppRoutes() {
       <Route path="projects/:projectId/timeline" element={<TimelineRoute />} />
       <Route path="projects/:projectId/workspace" element={<WorkspaceRoute />} />
       <Route path="projects/:projectId/preview" element={<PreviewRoute />} />
+      <Route path="projects/:projectId/floor" element={<ProjectFloorRoute />} />
       <Route path="agents" element={<AgentsRoute />} />
       <Route path="agents/:agentId" element={<ChatRoute />} />
       <Route path="agents/:agentId/chat" element={<ChatRoute />} />

@@ -29,7 +29,7 @@ sessionsRouter.get("/", async (c) => {
   const search = c.req.query("search");
   const agentId = c.req.query("agentId");
   const channelId = c.req.query("channelId");
-  const projectName = c.req.query("projectName");
+  const projectId = c.req.query("projectId") ?? c.req.query("projectName");
   const status = c.req.query("status");
   const from = c.req.query("from");
   const to = c.req.query("to");
@@ -49,7 +49,7 @@ sessionsRouter.get("/", async (c) => {
     search,
     agentId,
     channelId,
-    projectName,
+    projectId,
     status,
     from,
     to,
@@ -88,14 +88,14 @@ sessionsRouter.get("/analytics", async (c) => {
   const to = c.req.query("to");
   const agentId = c.req.query("agentId");
   const channelId = c.req.query("channelId");
-  const projectName = c.req.query("projectName");
+  const projectId = c.req.query("projectId") ?? c.req.query("projectName");
 
   const sessions = await sessionManager.listSessions(username, {
     from,
     to,
     agentId,
     channelId,
-    projectName,
+    projectId,
     archived: "false",
   });
 
@@ -104,7 +104,7 @@ sessionsRouter.get("/analytics", async (c) => {
     to,
     agentId,
     channelId,
-    projectName,
+    projectId,
     archived: "true",
   });
 
@@ -253,7 +253,7 @@ sessionsRouter.post("/:id/unarchive", async (c) => {
 });
 
 sessionsRouter.post("/", zValidator("json", CreateSessionSchema), async (c) => {
-  const { name, projectName, agentId, channelId, teamId, experimentId } = c.req.valid("json");
+  const { name, projectId, agentId, channelId, teamId, experimentId } = c.req.valid("json");
   const { username } = getAuthPayload(c);
   const sessionId = crypto.randomUUID();
 
@@ -269,21 +269,21 @@ sessionsRouter.post("/", zValidator("json", CreateSessionSchema), async (c) => {
 
   const now = new Date().toISOString();
 
-  let resolvedProjectName = projectName;
-  if (projectName) {
+  let resolvedProjectId = projectId;
+  if (projectId) {
     try {
-      const projectDir = resolveProjectDir(username, projectName);
+      const projectDir = resolveProjectDir(username, projectId);
       if (projectDir) {
         const metaPath = _join(projectDir, "project.json");
         if (_existsSync(metaPath)) {
           const meta = JSON.parse(_readFileSync(metaPath, "utf-8"));
-          if (meta.id && meta.id !== projectName) {
-            resolvedProjectName = meta.id;
+          if (meta.id && meta.id !== projectId) {
+            resolvedProjectId = meta.id;
           }
         }
       }
     } catch (e) {
-      console.error("[Sessions] Failed to resolve canonical projectName:", e);
+      console.error("[Sessions] Failed to resolve canonical projectId:", e);
     }
   }
 
@@ -293,7 +293,7 @@ sessionsRouter.post("/", zValidator("json", CreateSessionSchema), async (c) => {
     createdAt: now,
     updatedAt: now,
     messageCount: 0,
-    projectName: resolvedProjectName,
+    projectId: resolvedProjectId,
     agentId: ownerAgentId,
     channelId,
     teamId,
@@ -306,7 +306,7 @@ sessionsRouter.post("/", zValidator("json", CreateSessionSchema), async (c) => {
     name,
     createdAt: now,
     updatedAt: now,
-    projectName: resolvedProjectName || null,
+    projectId: resolvedProjectId || null,
     agentId: ownerAgentId || null,
     channelId: channelId || null,
     teamId: teamId || null,
@@ -318,7 +318,7 @@ sessionsRouter.post("/", zValidator("json", CreateSessionSchema), async (c) => {
   });
 
   if (!teamId || isOrchestration) {
-    sessionManager.getOrCreateSession(username, sessionId, resolvedProjectName, ownerAgentId, channelId, teamId ? {
+    sessionManager.getOrCreateSession(username, sessionId, resolvedProjectId, ownerAgentId, channelId, teamId ? {
       workspaceDir: getTeamWorkspaceDir(username, teamId),
     } : undefined).catch(err => {
       console.error(`[Session Start Async] Failed for ${sessionId}:`, err);
@@ -335,7 +335,7 @@ sessionsRouter.post("/:id/prompt", zValidator("json", PromptSchema), async (c) =
 
   const session = await sessionManager.getOrCreateSession(username, sessionId);
   const metadata = sessionManager.metadataStore.getSessionMetadata(username, sessionId) || {};
-  const projectName = metadata.projectName;
+  const projectId = (metadata.projectId ?? metadata.projectName) as string | undefined;
 
   const execId = crypto.randomUUID();
   let execDir: string | null = null;
@@ -343,9 +343,9 @@ sessionsRouter.post("/:id/prompt", zValidator("json", PromptSchema), async (c) =
   const errors: string[] = [];
   const startTime = Date.now();
 
-  if (projectName) {
+  if (projectId) {
     const userDir = sessionManager.userConfig.ensureUserDir(username);
-    const projectExecsDir = join(userDir, "projects", projectName, "executions");
+    const projectExecsDir = join(userDir, "projects", projectId, "executions");
     if (!existsSync(projectExecsDir)) mkdirSync(projectExecsDir, { recursive: true });
     execDir = join(projectExecsDir, execId);
     mkdirSync(execDir, { recursive: true });
@@ -390,7 +390,7 @@ sessionsRouter.post("/:id/prompt", zValidator("json", PromptSchema), async (c) =
           createdAt: new Date().toISOString(),
         }, null, 2));
       } catch (e) {
-        console.error(`[SessionsRoute] Failed to save execution log for project ${projectName}:`, e);
+        console.error(`[SessionsRoute] Failed to save execution log for project ${projectId}:`, e);
       }
     }
   };
@@ -416,7 +416,7 @@ sessionsRouter.post(
 
     const session = await sessionManager.getOrCreateSession(username, sessionId);
     const metadata = sessionManager.metadataStore.getSessionMetadata(username, sessionId) || {};
-    const projectName = metadata.projectName;
+    const projectId = (metadata.projectId ?? metadata.projectName) as string | undefined;
 
     const execId = crypto.randomUUID();
     let execDir: string | null = null;
@@ -424,9 +424,9 @@ sessionsRouter.post(
     const errors: string[] = [];
     const startTime = Date.now();
 
-    if (projectName) {
+    if (projectId) {
       const userDir = sessionManager.userConfig.ensureUserDir(username);
-      const projectExecsDir = join(userDir, "projects", projectName, "executions");
+      const projectExecsDir = join(userDir, "projects", projectId, "executions");
       if (!existsSync(projectExecsDir)) mkdirSync(projectExecsDir, { recursive: true });
       execDir = join(projectExecsDir, execId);
       mkdirSync(execDir, { recursive: true });
@@ -471,7 +471,7 @@ sessionsRouter.post(
             createdAt: new Date().toISOString(),
           }, null, 2));
         } catch (e) {
-          console.error(`[SessionsRoute] Failed to save execution log for project ${projectName}:`, e);
+          console.error(`[SessionsRoute] Failed to save execution log for project ${projectId}:`, e);
         }
       }
     };
@@ -837,7 +837,7 @@ sessionsRouter.post(
   zValidator("json", ToolPermissionsSchema),
   async (c) => {
     const sessionId = c.req.param("id");
-    const { tools, executionMode } = c.req.valid("json");
+    const { tools, executionMode, autonomyLevel } = c.req.valid("json");
     const { username } = getAuthPayload(c);
 
     if (sessionId.startsWith(SessionPrefix.EXEC)) {
@@ -922,8 +922,11 @@ sessionsRouter.post(
     if (executionMode) {
       sessionManager.metadataStore.setExecutionMode(username, sessionId, executionMode);
     }
+    if (autonomyLevel) {
+      sessionManager.metadataStore.setAutonomyLevel(username, sessionId, autonomyLevel);
+    }
 
-    return c.json({ success: true, tools, executionMode });
+    return c.json({ success: true, tools, executionMode, autonomyLevel });
   }
 );
 
@@ -954,8 +957,9 @@ sessionsRouter.get("/:id/tools", async (c) => {
     }
   }
   const executionMode = sessionManager.metadataStore.getExecutionMode(username, sessionId);
+  const autonomyLevel = sessionManager.metadataStore.getAutonomyLevel(username, sessionId);
 
-  return c.json({ tools, serialTools, toolStatus: getGatedToolStatus(username), executionMode });
+  return c.json({ tools, serialTools, toolStatus: getGatedToolStatus(username), executionMode, autonomyLevel });
 });
 
 sessionsRouter.get("/:id/export", async (c) => {

@@ -1,6 +1,6 @@
 import { useLocation } from "react-router-dom";
 
-export type RoutePage = "chat" | "delegations" | "timeline" | "workspace" | "preview" | "projects" | "settings" | "skills" | "agents" | "org" | "benchmark" | "teams" | "team" | "logs" | "plugins" | "sessions" | "analytics" | "not-found" | "dashboard";
+export type RoutePage = "chat" | "delegations" | "timeline" | "workspace" | "preview" | "projects" | "settings" | "skills" | "agents" | "org" | "benchmark" | "teams" | "team" | "logs" | "plugins" | "sessions" | "analytics" | "not-found" | "dashboard" | "floor";
 
 export function useRoutePage(): RoutePage {
   const { pathname } = useLocation();
@@ -8,6 +8,7 @@ export function useRoutePage(): RoutePage {
   if (pathname.startsWith("/team/")) return "team";
   if (pathname.includes("/benchmarks")) return "benchmark";
   if (pathname.includes("/org")) return "org";
+  if (pathname.includes("/floor")) return "floor";
   if (pathname.includes("/delegations")) return "delegations";
   if (pathname.includes("/timeline")) return "timeline";
   if (pathname.includes("/workspace") || pathname === "/workspace") return "workspace";

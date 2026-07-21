@@ -3,15 +3,15 @@ import { createFactoryTool, validateParams } from "../core/tools/factory-tool";
 import { agentRegistry } from "../agents";
 import { sessionManager } from "../core/session-manager";
 
-const mockBroadcast = mock((username: string, data: any) => {});
+const mockBroadcast = mock((username: string, data: any) => { });
 
 // Mock the ws/handler module so we can verify notifications are broadcasted
 mock.module("../ws/handler", () => ({
   broadcastToUser: mockBroadcast,
-  broadcastToSession: mock(() => {}),
+  broadcastToSession: mock(() => { }),
 }));
 
-describe("Factory Tool Validation & Broadcast Tests", () => {
+describe("Spaces Tool Validation & Broadcast Tests", () => {
   beforeEach(() => {
     mockBroadcast.mockClear();
   });

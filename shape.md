@@ -1,4 +1,4 @@
-# Orquestador de Proyectos Agénticos
+# SHAPES Orquestador de Proyectos Agénticos
 ### Reporte de funcionalidades y arquitectura — OpenAI Build Week (Codex + GPT-5.6)
 
 ---

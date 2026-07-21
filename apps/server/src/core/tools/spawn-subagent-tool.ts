@@ -85,9 +85,9 @@ Do NOT use for quick single-line reads or trivial edits you can do inline.`,
       } else if (parentMeta.agentId) {
         parentEntityType = "agent";
         parentEntityId = parentMeta.agentId;
-      } else if (parentMeta.projectName) {
+      } else if (parentMeta.projectId || parentMeta.projectName) {
         parentEntityType = "project";
-        parentEntityId = parentMeta.projectName;
+        parentEntityId = parentMeta.projectId || parentMeta.projectName;
       }
 
       const userDir = sessionManager.userConfig.ensureUserDir(username);

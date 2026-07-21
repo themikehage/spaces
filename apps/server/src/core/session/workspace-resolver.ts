@@ -14,6 +14,7 @@ import {
 } from "shared";
 import { DEFAULT_AGENTS_MD, DEFAULT_FACTORY_SKILLS } from "../default-factory-skills";
 import { userConfigManager } from "./user-config";
+import { sessionMetadataStore } from "./metadata-store";
 
 export function getResolvedSkillPaths(cwd: string, username?: string): string[] {
   const paths: string[] = [];
@@ -148,7 +149,7 @@ export function resolveProjectDir(username: string, nameOrId: string): string | 
 export function resolveSessionWorkspace(
   username: string,
   sessionId: string,
-  projectName?: string,
+  projectId?: string,
   agentId?: string,
   teamId?: string
 ): { sessionDir: string; workspaceDir: string } {
@@ -162,12 +163,12 @@ export function resolveSessionWorkspace(
     workspaceDir = getTeamWorkspaceDir(username, teamId);
   } else if (agentId) {
     workspaceDir = getAgentWorkspaceDir(username, agentId);
-  } else if (projectName) {
-    const resolved = resolveProjectDir(username, projectName);
+  } else if (projectId) {
+    const resolved = resolveProjectDir(username, projectId);
     if (resolved) {
       workspaceDir = join(resolved, "workspace");
     } else {
-      workspaceDir = getProjectWorkspaceDir(username, projectName);
+      workspaceDir = getProjectWorkspaceDir(username, projectId);
     }
   }
 
@@ -177,3 +178,29 @@ export function resolveSessionWorkspace(
 
   return { sessionDir, workspaceDir };
 }
+
+export function resolveSessionAllowedWriteDir(username: string, sessionId: string): string {
+  const metadata = sessionMetadataStore.getSessionMetadata(username, sessionId);
+  if (!metadata) {
+    return getUserDir(username);
+  }
+
+  if (metadata.parentSessionId) {
+    return resolveSessionAllowedWriteDir(username, metadata.parentSessionId);
+  }
+
+  if (metadata.teamId) {
+    return getTeamWorkspaceDir(username, metadata.teamId);
+  }
+  if (metadata.agentId) {
+    return getAgentWorkspaceDir(username, metadata.agentId);
+  }
+  const projectId = metadata.projectId ?? metadata.projectName;
+  if (projectId) {
+    const resolved = resolveProjectDir(username, projectId);
+    return resolved ? join(resolved, "workspace") : getProjectWorkspaceDir(username, projectId);
+  }
+
+  return getUserDir(username);
+}
+

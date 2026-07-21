@@ -17,7 +17,7 @@ export type SessionListItem = {
   updatedAt: string;
   messageCount: number;
   status?: "active" | "streaming" | "task-running" | "sleeping";
-  projectName?: string;
+  projectId?: string;
   agentId?: string;
   channelId?: string;
   teamId?: string;
@@ -39,7 +39,7 @@ export interface SessionListQuery {
   agentId?: string;
   channelId?: string;
   teamId?: string;
-  projectName?: string;
+  projectId?: string;
   status?: string;
   from?: string;
   to?: string;
@@ -110,7 +110,7 @@ export class SessionLister {
             updatedAt: (metadata.updatedAt as string) || new Date(0).toISOString(),
             messageCount,
             status,
-            projectName: metadata.projectName as string | undefined,
+            projectId: ((metadata.projectId ?? metadata.projectName) as string | undefined),
             agentId: metadata.agentId as string | undefined,
             channelId: metadata.channelId as string | undefined,
             teamId: metadata.teamId as string | undefined,
@@ -189,7 +189,7 @@ export class SessionLister {
                         updatedAt: summary.createdAt || new Date().toISOString(),
                         messageCount: 0,
                         status: "sleeping",
-                        projectName: entry.name,
+                        projectId: entry.name,
                         isExecution: true,
                         durationMs: typeof summary.durationMs === "number" ? summary.durationMs : undefined,
                         errorCount: Array.isArray(summary.errors) ? summary.errors.length : 0,
@@ -232,8 +232,8 @@ export class SessionLister {
           filtered = filtered.filter((s) => s.teamId === query.teamId);
         }
 
-        if (query.projectName) {
-          filtered = filtered.filter((s) => s.projectName === query.projectName);
+        if (query.projectId) {
+          filtered = filtered.filter((s) => s.projectId === query.projectId);
         }
 
         if (query.status) {

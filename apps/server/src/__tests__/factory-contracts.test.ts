@@ -1,7 +1,7 @@
 import { describe, expect, it } from "bun:test";
 import { FACTORY_CONTRACTS } from "../core/tools/factory-contracts";
 
-describe("Factory Contracts Tests", () => {
+describe("Spaces Contracts Tests", () => {
   it("should have all required entities defined", () => {
     const expectedEntities = [
       "agents",

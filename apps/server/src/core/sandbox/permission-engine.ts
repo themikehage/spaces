@@ -1,4 +1,6 @@
 import { buildSubagentRules, evaluateSubagentRules } from "./subagent-permissions";
+import { resolve, sep } from "node:path";
+import { tmpdir } from "node:os";
 
 export type PermissionVerdict =
   | { allow: true }
@@ -11,6 +13,7 @@ export interface PermissionEngineOptions {
   sessionId?: string;
   parentSessionId?: string;
   executionMode?: "readonly" | "standard" | "autonomous";
+  allowedWriteDir?: string;
 }
 
 export interface PermissionRule {
@@ -124,6 +127,25 @@ const SUBAGENT_DENY_RULES: PermissionRule[] = [
 ];
 
 export class PermissionEngine {
+  isSubpath(parent: string, child: string): boolean {
+    try {
+      const parentNormalized = resolve(parent).toLowerCase() + sep;
+      const childNormalized = resolve(child).toLowerCase() + sep;
+      return childNormalized.startsWith(parentNormalized);
+    } catch {
+      return false;
+    }
+  }
+
+  private isTempPath(targetPath: string): boolean {
+    try {
+      const tempDir = tmpdir();
+      return this.isSubpath(tempDir, targetPath) || this.isSubpath("/tmp", targetPath);
+    } catch {
+      return false;
+    }
+  }
+
   evaluate(toolName: string, args: Record<string, unknown>, options?: PermissionEngineOptions): PermissionVerdict {
     const subject = this.extractSubject(toolName, args);
 
@@ -138,7 +160,23 @@ export class PermissionEngine {
       }
     }
 
-    // 2. Evaluate dynamic rules for subagents if username and sessionId are available
+    // 2. Evaluate filesystem sandbox dynamic rules if allowedWriteDir is provided
+    if ((toolName === "write" || toolName === "edit") && options?.allowedWriteDir) {
+      const targetPath = subject;
+      const allowedDir = options.allowedWriteDir;
+      const isInsideAllowed = this.isSubpath(allowedDir, targetPath) || this.isTempPath(targetPath);
+
+      if (!isInsideAllowed) {
+        if (options.executionMode !== "autonomous") {
+          return {
+            allow: "ask",
+            reason: `Writing/Editing outside the authorized workspace (${allowedDir}) requires confirmation.`
+          };
+        }
+      }
+    }
+
+    // 3. Evaluate dynamic rules for subagents if username and sessionId are available
     if (options?.isSubagent && options.username && options.sessionId) {
       const subagentType = options.executionMode === "readonly" ? "explorer"
         : options.executionMode === "autonomous" ? "autonomous"
@@ -155,9 +193,12 @@ export class PermissionEngine {
       }
     }
 
-    // 3. Fall back to static ASK rules (skipped for autonomous mode)
+    // 4. Fall back to static ASK rules (skipped for autonomous mode)
     if (options?.executionMode !== "autonomous") {
       for (const rule of ASK_RULES) {
+        if ((rule.tool === "write" || rule.tool === "edit") && options?.allowedWriteDir) {
+          continue;
+        }
         if (this.matches(rule, toolName, subject)) {
           return { allow: "ask", reason: rule.reason };
         }

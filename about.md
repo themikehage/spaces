@@ -1,19 +1,43 @@
-# About - Scaffold Project
+# About - Spaces
 
-This is a modern monorepo scaffold designed to serve as a starting point for building scalable fullstack applications.
+Spaces es un espacio de trabajo en la nube para coordinar proyectos asistidos por agentes de IA. Cada proyecto reúne sesiones, archivos, agentes, equipos, configuración de modelos, herramientas MCP y un entorno de ejecución/preview.
 
-## Architecture
+## Arquitectura
 
-The project is structured as a monorepo using `pnpm` workspaces:
+El repositorio es un monorepo con workspaces de `pnpm`:
 
-- **`apps/client`**: Main user application built using React 19, Vite, TypeScript, and TailwindCSS v4.
-- **`apps/landing`**: Landing/marketing page built using React 19, Vite, TypeScript, and TailwindCSS v4.
-- **`apps/server`**: Hono API backend powered by Bun, utilizing TypeScript and Zod for validation.
-- **`packages/shared`**: Shared TypeScript module containing common Zod schemas, helper functions, and types used by both client and server applications.
+- **`apps/client`**: aplicación principal en React 19, Vite, TypeScript y Tailwind CSS v4. Incluye chat, proyectos, agentes, equipos, sesiones, delegaciones, workspace de archivos, preview, timeline, logs, plugins, skills y ajustes.
+- **`apps/landing`**: landing de producto en React, Vite y Tailwind CSS v4.
+- **`apps/server`**: servidor Bun + Hono. Expone API REST, autenticación, WebSocket y los servicios de ejecución del producto.
+- **`packages/shared`**: contratos, esquemas Zod, tipos y utilidades compartidos entre aplicaciones.
 
-## Technical Choices
+## Capacidades principales
 
-- **Package Manager**: `pnpm` for efficient, cached workspace package dependency management.
-- **Runtime**: `Bun` on the server for ultra-fast startup and execution.
-- **Styling**: `TailwindCSS v4` utilizing CSS-first configuration and dynamic design properties.
-- **Validation**: `Zod` to maintain single-source-of-truth types and validation schemas.
+- Gestión de proyectos, sesiones, archivos y workspaces.
+- Orquestación de agentes y equipos, incluidas delegaciones y aprobaciones humanas.
+- Catálogo y configuración de proveedores y modelos de IA por usuario.
+- Integración con skills, plugins y servidores MCP.
+- Previsualización de proyectos, backups, logs y galería/factory.
+- Comunicación en tiempo real mediante WebSocket en `/ws`.
+
+## Backend
+
+El punto de entrada está en `apps/server/src/index.ts`. Las rutas se agrupan bajo `/api`; entre ellas se incluyen autenticación, sesiones, archivos, modelos, proveedores, agentes, equipos, preview, backup, logs, MCP, ajustes, galería, factory y aprobaciones.
+
+La configuración y las credenciales por usuario se almacenan localmente. Los secretos de proveedores se cifran antes de persistirse. El servidor también inicia la infraestructura de preview y realiza limpieza periódica de sesiones.
+
+## Decisiones técnicas
+
+- **Gestión de paquetes:** `pnpm` workspaces.
+- **Runtime y API:** Bun y Hono.
+- **Interfaz:** React 19, Vite y Tailwind CSS v4.
+- **Contratos y validación:** TypeScript estricto y Zod.
+- **Tiempo real:** WebSocket integrado en Bun/Hono.
+
+## Comandos habituales
+
+- `pnpm dev`: inicia cliente, landing y servidor en paralelo.
+- `pnpm build`: compila todos los workspaces.
+- `pnpm --filter client run dev`: inicia la aplicación principal.
+- `pnpm --filter landing run dev`: inicia la landing.
+- `pnpm --filter server run dev`: inicia el servidor en modo desarrollo.

@@ -19,7 +19,7 @@ export function Breadcrumbs({
   activeTeam = null,
   onNavigate,
   l,
-  factoryName = "Factory",
+  factoryName = "Spaces",
 }: BreadcrumbsProps) {
   let items: { label: string; path?: string }[] = [];
 
@@ -97,9 +97,8 @@ export function Breadcrumbs({
               </button>
             ) : (
               <span
-                className={`${
-                  isLast ? "font-semibold text-foreground" : "text-muted-foreground font-medium"
-                }`}
+                className={`${isLast ? "font-semibold text-foreground" : "text-muted-foreground font-medium"
+                  }`}
               >
                 {item.label}
               </span>

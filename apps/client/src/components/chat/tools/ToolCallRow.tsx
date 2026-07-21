@@ -636,6 +636,7 @@ function ToolBody({
           activeProjectName={activeProjectName}
           activeAgentId={activeAgentId}
           activeChannelId={activeChannelId}
+          activeTeamId={activeTeamId}
         />
       );
     case "refresh_ui":

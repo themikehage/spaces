@@ -349,7 +349,7 @@ export function MainLayout({
     if (page === "logs") return l.breadLogs || "Logs";
     if (page === "sessions") return l.breadSessions || "Sessions";
     if (page === "plugins") return "Plugins";
-    return "Factory";
+    return "Spaces";
   }, [activeProjectId, activeProjectName, activeAgent, activeTeam, page, l]);
 
   const { resolvedSessionId, resolving } = useSessionResolver({
@@ -383,7 +383,7 @@ export function MainLayout({
     children
   );
 
-  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "org" || page === "delegations" || page === "timeline";
+  const isContextView = page === "chat" || page === "workspace" || page === "preview" || page === "org" || page === "delegations" || page === "timeline" || page === "floor";
   const showNewSessionButton = !isHome && isContextView;
 
   const isNegotiationTeam = activeTeamData?.teamType === "Negotiation";
@@ -447,16 +447,31 @@ export function MainLayout({
     }
 
     if (activeProjectName || activeProjectId) {
-      list.push({
-        id: "preview",
-        label: l.tabPreview,
-        path: basePath ? `${basePath}/preview` : "/preview",
-        icon: (
-          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 01-1.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
-          </svg>
-        ),
-      });
+      list.push(
+        {
+          id: "floor",
+          label: "Floor",
+          path: basePath ? `${basePath}/floor` : "/floor",
+          icon: (
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="7" height="9" rx="1" />
+              <rect x="14" y="3" width="7" height="5" rx="1" />
+              <rect x="14" y="12" width="7" height="9" rx="1" />
+              <rect x="3" y="16" width="7" height="5" rx="1" />
+            </svg>
+          ),
+        },
+        {
+          id: "preview",
+          label: l.tabPreview,
+          path: basePath ? `${basePath}/preview` : "/preview",
+          icon: (
+            <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM4.332 8.027a6.012 6.012 0 011.912-2.706C6.512 5.73 6.974 6 7.5 6A1.5 1.5 0 019 7.5V8a2 2 0 004 0 2 2 0 01-1.523-1.943A5.977 5.977 0 0116 10c0 .34-.028.675-.083 1H15a2 2 0 00-2 2v2.197A5.973 5.973 0 0110 16v-2a2 2 0 00-2-2 2 2 0 01-2-2 2 2 0 00-1.668-1.973z" clipRule="evenodd" />
+            </svg>
+          ),
+        }
+      );
     }
 
     if (activeTeam) {
@@ -490,119 +505,119 @@ export function MainLayout({
 
   const rightToolbarElement = (
     <>
-        <>
-          {!isMobile && (
-            <button
-              onClick={handleQuickCreate}
-              disabled={quickCreating}
-              className="flex items-center gap-1 px-1.5 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10 disabled:opacity-50"
-              title="Nueva sesion"
-            >
-              {quickCreating ? (
-                <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Plus size={14} />
-              )}
-            </button>
-          )}
-
-          {sessionId && (
-            <div className="relative flex items-center">
-              <button
-                onClick={() => setExportDropdownOpen(p => !p)}
-                className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10"
-                title="Exportar conversación"
-              >
-                <svg className="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
-                </svg>
-
-              </button>
-              {exportDropdownOpen && (
-                <>
-                  <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setExportDropdownOpen(false)} />
-                  <div className="absolute right-0 top-full mt-2 w-44 bg-card border border-input rounded-xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden p-1">
-                    <button
-                      onClick={() => handleExport("markdown")}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
-                    >
-                      Exportar Markdown (.md)
-                    </button>
-                    <button
-                      onClick={() => handleExport("jsonl")}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
-                    >
-                      Exportar JSONL (.jsonl)
-                    </button>
-                    <button
-                      onClick={() => handleExport("json")}
-                      className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
-                    >
-                      Exportar JSON (.json)
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
+      <>
+        {!isMobile && (
           <button
-            onClick={() => setSessionPopoverOpen((p) => !p)}
-            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10"
-            title={l.titleSessions}
+            onClick={handleQuickCreate}
+            disabled={quickCreating}
+            className="flex items-center gap-1 px-1.5 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10 disabled:opacity-50"
+            title="Nueva sesion"
           >
-            <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
-              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.8 2.8a1 1 0 101.414-1.414L11 10.586V6z" clipRule="evenodd" />
-            </svg>
-            <span>{l.btnSessions}</span>
+            {quickCreating ? (
+              <div className="w-3 h-3 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+            ) : (
+              <Plus size={14} />
+            )}
           </button>
-          <SessionPopover
-            isOpen={sessionPopoverOpen}
-            onClose={() => setSessionPopoverOpen(false)}
-            activeSessionId={sessionId}
-            activeProjectName={activeProjectId}
-            activeProjectFriendlyName={activeProjectName}
-            activeAgent={activeAgent}
-            activeTeam={activeTeam}
-            onSelectSession={handleSelectSession}
-            onNewSession={handleNewSession}
-          />
-          {activeAgent && activeAgent.id !== "lab-architect" && (
+        )}
+
+        {sessionId && (
+          <div className="relative flex items-center">
             <button
-              onClick={() => setShowAgentEdit(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
-              title="Configurar agente"
+              onClick={() => setExportDropdownOpen(p => !p)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10"
+              title="Exportar conversación"
             >
-              <Settings size={14} />
+              <svg className="w-3 h-3 text-muted-foreground" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M16.5 12 12 16.5m0 0L7.5 12m4.5 4.5V3" />
+              </svg>
+
             </button>
-          )}
-          {activeProjectId && (
-            <button
-              onClick={() => setShowProjectEdit(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
-              title="Configurar proyecto"
-            >
-              <Settings size={14} />
-            </button>
-          )}
-          {activeTeam && (
-            <button
-              onClick={() => setShowTeamEdit(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
-              title="Configurar equipo"
-            >
-              <Settings size={14} />
-            </button>
-          )}
-          {!rawActiveAgent && !activeProjectId && !activeTeam && page === "chat" && (
-            <button
-              onClick={() => setShowGlobalEdit(true)}
-              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
-              title="Configurar Factory"
-            >
-              <Settings size={14} />
-            </button>
-          )}
-        </>
+            {exportDropdownOpen && (
+              <>
+                <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setExportDropdownOpen(false)} />
+                <div className="absolute right-0 top-full mt-2 w-44 bg-card border border-input rounded-xl shadow-2xl flex flex-col z-50 animate-scale-in overflow-hidden p-1">
+                  <button
+                    onClick={() => handleExport("markdown")}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
+                  >
+                    Exportar Markdown (.md)
+                  </button>
+                  <button
+                    onClick={() => handleExport("jsonl")}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
+                  >
+                    Exportar JSONL (.jsonl)
+                  </button>
+                  <button
+                    onClick={() => handleExport("json")}
+                    className="w-full text-left px-3 py-1.5 rounded-lg text-[11px] font-medium text-muted-foreground hover:bg-card-hover hover:text-foreground transition-all cursor-pointer font-sans"
+                  >
+                    Exportar JSON (.json)
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        <button
+          onClick={() => setSessionPopoverOpen((p) => !p)}
+          className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-semibold border border-border hover:bg-card text-muted-foreground hover:text-foreground transition-all cursor-pointer bg-card/10"
+          title={l.titleSessions}
+        >
+          <svg width="12" height="12" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.8 2.8a1 1 0 101.414-1.414L11 10.586V6z" clipRule="evenodd" />
+          </svg>
+          <span>{l.btnSessions}</span>
+        </button>
+        <SessionPopover
+          isOpen={sessionPopoverOpen}
+          onClose={() => setSessionPopoverOpen(false)}
+          activeSessionId={sessionId}
+          activeProjectName={activeProjectId}
+          activeProjectFriendlyName={activeProjectName}
+          activeAgent={activeAgent}
+          activeTeam={activeTeam}
+          onSelectSession={handleSelectSession}
+          onNewSession={handleNewSession}
+        />
+        {activeAgent && activeAgent.id !== "lab-architect" && (
+          <button
+            onClick={() => setShowAgentEdit(true)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
+            title="Configurar agente"
+          >
+            <Settings size={14} />
+          </button>
+        )}
+        {activeProjectId && (
+          <button
+            onClick={() => setShowProjectEdit(true)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
+            title="Configurar proyecto"
+          >
+            <Settings size={14} />
+          </button>
+        )}
+        {activeTeam && (
+          <button
+            onClick={() => setShowTeamEdit(true)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
+            title="Configurar equipo"
+          >
+            <Settings size={14} />
+          </button>
+        )}
+        {!rawActiveAgent && !activeProjectId && !activeTeam && page === "chat" && (
+          <button
+            onClick={() => setShowGlobalEdit(true)}
+            className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-card transition-all cursor-pointer"
+            title="Configurar Spaces"
+          >
+            <Settings size={14} />
+          </button>
+        )}
+      </>
     </>
   );
 

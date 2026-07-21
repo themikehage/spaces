@@ -3,9 +3,9 @@ import type { SupportedLocale } from "@/lib/types";
 export const literals = {
   en: {
     title: "Global Agent Settings",
-    subtitle: "Configure the root Factory context",
+    subtitle: "Configure the root Spaces context",
     factoryNameLabel: "Display Name",
-    factoryNamePlaceholder: "e.g. Factory / Antigravity",
+    factoryNamePlaceholder: "e.g. Spaces / Antigravity",
     factorySystemPromptLabel: "Global System Prompt / Persona",
     factorySystemPromptPlaceholder: "Instructions appended to all root sessions...",
     cancel: "Cancel",
@@ -16,9 +16,9 @@ export const literals = {
   },
   es: {
     title: "Ajustes del Agente Global",
-    subtitle: "Configura el contexto raíz de la Factory",
+    subtitle: "Configura el contexto raíz de la Spaces",
     factoryNameLabel: "Nombre a mostrar",
-    factoryNamePlaceholder: "ej. Factory / Antigravity",
+    factoryNamePlaceholder: "ej. Spaces / Antigravity",
     factorySystemPromptLabel: "Instrucciones de Sistema Global / Persona",
     factorySystemPromptPlaceholder: "Instrucciones añadidas a todas las sesiones raíz...",
     cancel: "Cancelar",

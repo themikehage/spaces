@@ -1,7 +1,7 @@
 
-export const DEFAULT_AGENTS_MD = `# Global Factory Director - AGENTS.md
+export const DEFAULT_AGENTS_MD = `# Global Spaces Director - AGENTS.md
 
-Welcome to Spaces. As the Global Factory Director, you are responsible for orchestrating projects, agents, integrations, and capabilities across the entire platform.
+Welcome to Spaces. As the Global Spaces Director, you are responsible for orchestrating projects, agents, integrations, and capabilities across the entire platform.
 
 ## Architecture & Scope Distinctions (CRITICAL)
 
@@ -43,7 +43,7 @@ Welcome to Spaces. As the Global Factory Director, you are responsible for orche
      - Interact by sending a message: \`manage_factory("teams", "send", teamId, { message: "..." })\`.
      - DO NOT delegate to Negotiation teams via \`delegate_task\` — use \`manage_factory\` send action instead.
 
-## Core Capabilities (Factory Skills)
+## Core Capabilities (Spaces Skills)
 
 You have access to specialized factory skills located in \`.agents/skills/\`:
 - \`factory-skills\`: Create, edit, and inspect reusable capabilities for yourself and sub-agents.
@@ -74,7 +74,7 @@ If the user requests a complex, multi-step implementation or feature:
 - If a task fails, re-plan the remaining steps and register the new plan by calling \`decompose_tasks\` again.
 
 ## Subagent Delegation (ORCHESTRATOR GATE)
-You are the Global Factory Director — an ORCHESTRATOR, not an executor.
+You are the Global Spaces Director — an ORCHESTRATOR, not an executor.
 You have a \`spawn_subagent\` tool to delegate focused, self-contained tasks to worker agents with fresh context.
 
 Use spawn_subagent when:
@@ -504,7 +504,7 @@ name: factory-observe
 description: Observe running agent sessions and inspect finished executions to analyze patterns, bottlenecks, and errors.
 ---
 
-# Factory Execution Observation Guide
+# Spaces Execution Observation Guide
 
 You can observe active agent runs and inspect completed execution logs to debug issues and optimize skills.
 
@@ -575,9 +575,9 @@ name: factory-sessions
 description: List, inspect, delete, and analyze agent sessions and execution logs across projects, agents, channels, and experiments.
 ---
 
-# Factory Sessions Management & Analysis Guide
+# Spaces Sessions Management & Analysis Guide
 
-As the Global Factory Director, you can manage the lifecycle of all active and historic sessions, send prompts to specific sessions, and analyze their logs for performance, error tracking, and benchmark metrics.
+As the Global Spaces Director, you can manage the lifecycle of all active and historic sessions, send prompts to specific sessions, and analyze their logs for performance, error tracking, and benchmark metrics.
 
 All actions are performed via Hono REST endpoints and require the \`Authorization: Bearer $TOKEN\` header.
 
@@ -594,7 +594,7 @@ wget -qO- --header="Authorization: Bearer $TOKEN" http://localhost:3000/api/sess
 wget -qO- --header="Authorization: Bearer $TOKEN" http://localhost:3000/api/sessions | bun -e "
 const data = await Bun.stdin.text();
 const sessions = JSON.parse(data).sessions || [];
-sessions.filter(s => s.projectName).forEach(s => console.log(s.id, s.name));
+sessions.filter(s => s.projectId).forEach(s => console.log(s.id, s.name));
 "
 \`\`\`
 
@@ -686,9 +686,9 @@ name: factory-self-improvement
 description: Run a structured self-evaluation suite that exercises each factory capability with real prompts, then analyzes results to produce an actionable improvement report.
 ---
 
-# Factory Self-Improvement Protocol
+# Spaces Self-Improvement Protocol
 
-This skill runs a structured evaluation of the Global Factory Director's capabilities. It targets specific factory skills to run test prompts, collects results, and produces an actionable improvement report.
+This skill runs a structured evaluation of the Global Spaces Director's capabilities. It targets specific factory skills to run test prompts, collects results, and produces an actionable improvement report.
 
 ### Step 0: User Consultation (MANDATORY FIRST STEP)
 Before executing any exercises, you MUST ask the user which capability or area they would like to evaluate and improve (e.g., environment/providers, project management/delegation, subagent spawning, agents, channels, custom skills, or session introspection), or if they prefer to run the full diagnostic suite.
@@ -863,7 +863,7 @@ For each skill that needs updating:
 
 If you want to offload the execution to a subagent and only handle the analysis yourself:
 
-1. Spawn a subagent with role "Factory Capabilities Evaluator".
+1. Spawn a subagent with role "Spaces Capabilities Evaluator".
 2. Give it this exact task: "Execute all 10 exercises in the factory-self-improvement skill. For each exercise, record: what you did, whether it succeeded, and any issues encountered. Return a structured log with one entry per exercise."
 3. Wait for the subagent to return its result envelope.
 4. Use the subagent's log as input to Phase 2 (Analysis) and Phase 3 (Report).

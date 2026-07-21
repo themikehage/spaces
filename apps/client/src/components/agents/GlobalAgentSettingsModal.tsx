@@ -14,7 +14,7 @@ interface Props {
 
 export function GlobalAgentSettingsModal({ onClose, onSaveSuccess }: Props) {
   const l = useLiterals(u);
-  const [factoryName, setFactoryName] = useState("Factory");
+  const [factoryName, setFactoryName] = useState("Spaces");
   const [factorySystemPrompt, setFactorySystemPrompt] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ export function GlobalAgentSettingsModal({ onClose, onSaveSuccess }: Props) {
         const res = await apiFetch("/api/settings");
         if (res.ok) {
           const data = await res.json();
-          setFactoryName(data.factoryName || "Factory");
+          setFactoryName(data.factoryName || "Spaces");
           setFactorySystemPrompt(data.factorySystemPrompt || "");
           const avUrl = data.factoryAvatarUrl || null;
           setAvatarPreview(avUrl);

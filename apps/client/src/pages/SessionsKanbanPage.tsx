@@ -33,8 +33,8 @@ function SessionCard({
   onArchive: (e: React.MouseEvent) => void;
   onDelete: (e: React.MouseEvent) => void;
 }) {
-  const badgeText = session.projectName
-    ? `Proyecto ${session.projectName}`
+  const badgeText = session.projectId
+    ? `Proyecto ${session.projectId}`
     : session.teamId
       ? `Equipo`
       : session.agentId
@@ -206,8 +206,8 @@ export function SessionsKanbanPage({ onNavigate }: Props) {
       } else {
         path = `/agents/${session.agentId}/session/${session.id}`;
       }
-    } else if (session.projectName) {
-      path = `/projects/${session.projectName}/session/${session.id}`;
+    } else if (session.projectId) {
+      path = `/projects/${session.projectId}/session/${session.id}`;
     } else {
       path = `/session/${session.id}`;
     }

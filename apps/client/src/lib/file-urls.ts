@@ -36,7 +36,11 @@ export function resolveFileUrl(
   }
 
   let cleanPath = url.replace(/\\/g, "/");
-  if (cleanPath.startsWith("workspace/")) {
+  const workspaceMarker = "/workspace/";
+  const workspaceIndex = cleanPath.lastIndexOf(workspaceMarker);
+  if (workspaceIndex !== -1) {
+    cleanPath = cleanPath.substring(workspaceIndex + workspaceMarker.length);
+  } else if (cleanPath.startsWith("workspace/")) {
     cleanPath = cleanPath.substring("workspace/".length);
   }
   const params = new URLSearchParams();

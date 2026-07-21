@@ -56,7 +56,7 @@ settingsRouter.get("/", (c) => {
     subagentMaxDepth: settings.subagentMaxDepth !== undefined
       ? Number(settings.subagentMaxDepth)
       : appConfig.subagent.maxDepth,
-    factoryName: settings.factoryName ?? "Factory",
+    factoryName: settings.factoryName ?? "Spaces",
     factoryAvatarUrl: settings.factoryAvatarUrl ?? null,
     factorySystemPrompt: settings.factorySystemPrompt ?? "",
   });
@@ -138,7 +138,7 @@ settingsRouter.post("/avatar", async (c) => {
         unlinkSync(join(userDir, f));
       }
     }
-  } catch {}
+  } catch { }
 
   const ext = file.name.split(".").pop() || "png";
   const avatarPath = join(userDir, `factory-avatar.${ext}`);
@@ -164,7 +164,7 @@ settingsRouter.delete("/avatar", async (c) => {
           unlinkSync(join(userDir, f));
         }
       }
-    } catch {}
+    } catch { }
   }
 
   sessionManager.userConfig.saveUserSettings(username, { factoryAvatarUrl: null });

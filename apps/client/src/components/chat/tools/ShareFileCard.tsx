@@ -10,6 +10,7 @@ interface Props {
   activeProjectName?: string | null;
   activeAgentId?: string | null;
   activeChannelId?: string | null;
+  activeTeamId?: string | null;
 }
 
 const EXT_ICONS: Record<string, string> = {
@@ -75,7 +76,9 @@ export function ShareFileCard({
   sessionId,
   activeProjectName,
   activeAgentId,
-  activeChannelId}: Props) {
+  activeChannelId,
+  activeTeamId,
+}: Props) {
   const [downloading, setDownloading] = useState(false);
   const fileName = filePath.split(/[\\/]/).pop() || filePath;
   const displayName = title || fileName;
@@ -87,7 +90,8 @@ export function ShareFileCard({
     sessionId,
     activeProjectName,
     activeAgentId,
-    activeChannelId
+    activeChannelId,
+    activeTeamId
   );
   const fullDownloadUrl = downloadUrl.includes("?")
     ? `${downloadUrl}&download=1`

@@ -277,8 +277,8 @@ export function DashboardPage({ onNavigate, onSelectProject }: Props) {
       } else {
         path = `/agents/${session.agentId}/session/${session.id}`;
       }
-    } else if (session.projectName) {
-      path = `/projects/${session.projectName}/session/${session.id}`;
+    } else if (session.projectId) {
+      path = `/projects/${session.projectId}/session/${session.id}`;
     } else {
       path = `/session/${session.id}`;
     }
@@ -298,8 +298,8 @@ export function DashboardPage({ onNavigate, onSelectProject }: Props) {
       map.set(`team:${team.id}`, team.avatarUrl);
     }
     return (session: SessionItem) => {
-      if (session.projectName) {
-        const url = map.get(`project:${session.projectName}`);
+      if (session.projectId) {
+        const url = map.get(`project:${session.projectId}`);
         if (url) return url;
       }
       if (session.agentId) {
@@ -478,7 +478,7 @@ export function DashboardPage({ onNavigate, onSelectProject }: Props) {
                     >
                       <div className="w-[58px] h-[58px] bg-surface-hover flex-shrink-0 flex items-center justify-center relative border-r border-input/10">
                         <EntityAvatar
-                          name={session.projectName || session.name}
+                          name={session.projectId || session.name}
                           avatarUrl={avatarLookup(session)}
                           size="full"
                           type={session.teamId ? "team" : session.agentId ? "agent" : "project"}
@@ -492,7 +492,7 @@ export function DashboardPage({ onNavigate, onSelectProject }: Props) {
                           {session.name}
                         </h3>
                         <p className="text-[9px] text-text-secondary truncate mt-0.5 font-semibold uppercase tracking-wider">
-                          {session.projectName ? `Project: ${session.projectName}` : session.teamId ? "Team" : "Agent"}
+                          {session.projectId ? `Project: ${session.projectId}` : session.teamId ? "Team" : "Agent"}
                         </p>
                         <div className="flex items-center gap-1.5 mt-0.5">
                           <span className={`w-1.5 h-1.5 rounded-full ${statusColor}`} />

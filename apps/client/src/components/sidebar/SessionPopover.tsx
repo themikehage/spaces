@@ -18,7 +18,7 @@ interface SessionItem {
   updatedAt: string;
   messageCount: number;
   status?: SessionStatus;
-  projectName?: string;
+  projectId?: string;
   agentId?: string;
   teamId?: string;
   archived?: boolean;

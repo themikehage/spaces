@@ -112,13 +112,13 @@ export function SessionSidebar({
   const itemClass = useCallback((isActive: boolean) => {
     if (isMobile) {
       return `w-full flex items-center gap-3 px-4 py-3 h-12 rounded-lg text-base truncate transition-colors text-left cursor-pointer ${isActive
-          ? "bg-card-hover text-foreground font-semibold border-l-4 border-primary rounded-l-none pl-3"
-          : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
+        ? "bg-card-hover text-foreground font-semibold border-l-4 border-primary rounded-l-none pl-3"
+        : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
         }`;
     }
     return `w-full flex items-center gap-2 px-3 py-1 rounded-lg text-xs truncate transition-colors text-left cursor-pointer ${isActive
-        ? "bg-card-hover text-foreground font-medium border-l-2 border-primary rounded-l-none pl-2"
-        : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
+      ? "bg-card-hover text-foreground font-medium border-l-2 border-primary rounded-l-none pl-2"
+      : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
       }`;
   }, [isMobile]);
 
@@ -131,8 +131,8 @@ export function SessionSidebar({
   const chevronSize = isMobile ? 20 : 16;
 
   const factoryButtonClass = `${isMobile
-      ? "w-full flex items-center gap-3 px-4 py-3 h-12 rounded-lg text-base font-semibold transition-all cursor-pointer"
-      : "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+    ? "w-full flex items-center gap-3 px-4 py-3 h-12 rounded-lg text-base font-semibold transition-all cursor-pointer"
+    : "w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-all cursor-pointer"
     } ${isGlobal
       ? "bg-card text-primary border border-primary/30"
       : "bg-card/40 text-muted-foreground hover:bg-card hover:text-primary border border-transparent hover:border-primary/20"
@@ -141,13 +141,13 @@ export function SessionSidebar({
   const adminItemClass = useCallback((isActive: boolean) => {
     if (isMobile) {
       return `w-full flex items-center gap-3 px-4 py-3 h-12 rounded-lg text-base transition-colors cursor-pointer text-left ${isActive
-          ? "bg-card text-foreground font-semibold border-l-4 border-primary rounded-l-none pl-3"
-          : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
+        ? "bg-card text-foreground font-semibold border-l-4 border-primary rounded-l-none pl-3"
+        : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
         }`;
     }
     return `w-full flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs transition-colors cursor-pointer text-left ${isActive
-        ? "bg-card text-foreground font-medium"
-        : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
+      ? "bg-card text-foreground font-medium"
+      : "text-muted-foreground hover:bg-card/50 hover:text-foreground"
       }`;
   }, [isMobile]);
 
@@ -273,7 +273,7 @@ export function SessionSidebar({
 
   return (
     <div className="flex flex-col h-full bg-background select-none text-foreground">
-      {/* Factory Button */}
+      {/* Spaces Button */}
       <div className={isMobile ? "p-4 border-b border-border flex-shrink-0" : "p-3 border-b border-border flex-shrink-0"}>
         <button
           onClick={handleGoFactory}
@@ -282,7 +282,7 @@ export function SessionSidebar({
         >
           {globalSettings?.factoryAvatarUrl ? (
             <AgentAvatar
-              name={globalSettings.factoryName || "Factory"}
+              name={globalSettings.factoryName || "Spaces"}
               avatarUrl={globalSettings.factoryAvatarUrl}
               size={isMobile ? "sm" : "xs"}
               className="flex-shrink-0 rounded-full"
@@ -296,7 +296,7 @@ export function SessionSidebar({
               />
             </svg>
           )}
-          <span>{globalSettings?.factoryName || "Factory"}</span>
+          <span>{globalSettings?.factoryName || "Spaces"}</span>
         </button>
       </div>
 

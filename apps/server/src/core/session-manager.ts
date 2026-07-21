@@ -222,7 +222,7 @@ class SessionManager {
   async getOrCreateSession(
     username: string,
     sessionId: string,
-    projectName?: string,
+    projectId?: string,
     agentId?: string,
     channelId?: string,
     overrides?: SessionOverrides
@@ -251,7 +251,7 @@ class SessionManager {
         let { sessionDir, workspaceDir } = resolveSessionWorkspace(
           username,
           sessionId,
-          projectName,
+          projectId,
           agentId,
           channelId
         );
@@ -265,7 +265,7 @@ class SessionManager {
         }
 
         const metadataPath = join(sessionDir, "metadata.json");
-        let resolvedProjectName = projectName;
+        let resolvedProjectId = projectId;
         let resolvedAgentId = agentId;
         let resolvedChannelId = channelId;
         let persistedTools: string[] | undefined;
@@ -275,16 +275,16 @@ class SessionManager {
           : {};
         const updatedMeta = { ...existingMeta };
 
-        if (projectName || agentId || channelId) {
-          if (projectName !== undefined) updatedMeta.projectName = projectName;
+        if (projectId || agentId || channelId) {
+          if (projectId !== undefined) updatedMeta.projectId = projectId;
           if (agentId !== undefined) updatedMeta.agentId = agentId;
           if (channelId !== undefined) updatedMeta.channelId = channelId;
           writeFileSync(metadataPath, JSON.stringify(updatedMeta, null, 2), "utf-8");
-          resolvedProjectName = updatedMeta.projectName;
+          resolvedProjectId = updatedMeta.projectId ?? updatedMeta.projectName;
           resolvedAgentId = updatedMeta.agentId;
           resolvedChannelId = updatedMeta.channelId;
         } else {
-          resolvedProjectName = existingMeta.projectName;
+          resolvedProjectId = existingMeta.projectId ?? existingMeta.projectName;
           resolvedAgentId = existingMeta.agentId;
           resolvedChannelId = existingMeta.channelId;
           persistedTools = Array.isArray(existingMeta.tools) ? existingMeta.tools : undefined;
@@ -338,7 +338,7 @@ class SessionManager {
             agentDef,
             cachedMcpToolNames,
             experimentId: updatedMeta.experimentId || (existingMeta ? (existingMeta as any).experimentId : undefined),
-            projectName: resolvedProjectName,
+            projectId: resolvedProjectId,
           });
 
           resourceLoader = new DefaultResourceLoader({

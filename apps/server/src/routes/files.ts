@@ -295,6 +295,7 @@ filesRouter.get("/workspace-projects", async (c) => {
         let cloneUrl = null;
         let createdAt = null;
         let avatarUrl = null;
+        let status = "planning";
         if (existsSync(jsonPath)) {
           try {
             const proj = JSON.parse(readFileSync(jsonPath, "utf-8"));
@@ -302,11 +303,12 @@ filesRouter.get("/workspace-projects", async (c) => {
             cloneUrl = proj.cloneUrl || null;
             createdAt = proj.createdAt || null;
             avatarUrl = proj.avatarUrl || null;
+            status = proj.status || "planning";
           } catch {}
         } else {
           try {
             createdAt = new Date().toISOString();
-            writeFileSync(jsonPath, JSON.stringify({ id: entry.name, name: entry.name, cloneUrl: null, avatarUrl: null, createdAt }, null, 2), "utf-8");
+            writeFileSync(jsonPath, JSON.stringify({ id: entry.name, name: entry.name, cloneUrl: null, avatarUrl: null, status: "planning", createdAt }, null, 2), "utf-8");
           } catch {}
         }
         const stat = statSync(entryPath);
@@ -316,6 +318,7 @@ filesRouter.get("/workspace-projects", async (c) => {
           path: entry.name,
           cloneUrl,
           avatarUrl,
+          status,
           createdAt,
           diskPath: getProjectWorkspaceDir(username, entry.name),
           lastModified: stat.mtime.toISOString(),
@@ -378,6 +381,7 @@ filesRouter.post("/workspace-projects", async (c) => {
       name: name,
       cloneUrl: cloneUrl || null,
       avatarUrl: avatarUrl || null,
+      status: "planning",
       createdAt: new Date().toISOString(),
     };
     writeFileSync(join(baseDir, "project.json"), JSON.stringify(projectJson, null, 2), "utf-8");
@@ -389,6 +393,7 @@ filesRouter.post("/workspace-projects", async (c) => {
       path: projectId,
       cloneUrl: projectJson.cloneUrl,
       avatarUrl: projectJson.avatarUrl,
+      status: "planning",
       lastModified: stat.mtime.toISOString(),
     }, 201);
   } catch (err: any) {
@@ -411,7 +416,7 @@ filesRouter.delete("/workspace-projects/:id", async (c) => {
 
     const sessions = await sessionManager.listSessions(username);
     for (const s of sessions) {
-      if (s.projectName === id) {
+      if (s.projectId === id) {
         await sessionManager.destroySession(username, s.id);
       }
     }
@@ -439,7 +444,7 @@ filesRouter.patch("/workspace-projects/:id", async (c) => {
 
   try {
     const body = await c.req.json().catch(() => ({}));
-    const { name, cloneUrl, avatarUrl } = body;
+    const { name, cloneUrl, avatarUrl, status } = body;
 
     if (name !== undefined && (typeof name !== "string" || !name.trim())) {
       return c.json({ error: "Invalid project name" }, 400);
@@ -460,6 +465,26 @@ filesRouter.patch("/workspace-projects/:id", async (c) => {
     }
 
     const projectJson = JSON.parse(readFileSync(jsonPath, "utf-8"));
+
+    if (status !== undefined) {
+      if (!["planning", "running", "review", "done"].includes(status)) {
+        return c.json({ error: "Invalid status value" }, 400);
+      }
+      const VALID_TRANSITIONS: Record<string, string[]> = {
+        planning: ["running"],
+        running: ["review"],
+        review: ["done", "running"],
+        done: ["running", "planning"],
+      };
+      const currentStatus = projectJson.status || "planning";
+      if (currentStatus !== status) {
+        const allowed = VALID_TRANSITIONS[currentStatus] || [];
+        if (!allowed.includes(status)) {
+          return c.json({ error: `Invalid transition from ${currentStatus} to ${status}` }, 400);
+        }
+      }
+    }
+
     if (name !== undefined) {
       projectJson.name = name.trim();
     }
@@ -469,19 +494,32 @@ filesRouter.patch("/workspace-projects/:id", async (c) => {
     if (avatarUrl !== undefined) {
       projectJson.avatarUrl = avatarUrl ? avatarUrl.trim() : null;
     }
+    if (status !== undefined) {
+      projectJson.status = status;
+    }
 
     writeFileSync(jsonPath, JSON.stringify(projectJson, null, 2), "utf-8");
 
-    return c.json({
+    const updatedProject = {
       id,
       name: projectJson.name,
       path: id,
       cloneUrl: projectJson.cloneUrl,
       avatarUrl: projectJson.avatarUrl,
+      status: projectJson.status || "planning",
       createdAt: projectJson.createdAt || null,
       diskPath: getProjectWorkspaceDir(username, id),
       lastModified: statSync(projectPath).mtime.toISOString(),
-    });
+    };
+
+    try {
+      const { broadcastToUser } = await import("../ws/handler");
+      broadcastToUser(username, { type: "project_updated", project: updatedProject });
+    } catch (wsErr) {
+      console.error("[WS] Failed to broadcast project update:", wsErr);
+    }
+
+    return c.json(updatedProject);
   } catch (err: any) {
     return c.json({ error: err.message || "Failed to update project" }, 500);
   }
