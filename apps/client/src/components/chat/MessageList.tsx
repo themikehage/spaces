@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { AgentAvatar } from "@/components/shared/AgentAvatar";
 import { ImageGrid } from "./ImageGrid";
 import { ThinkingBlock, AssistantTextBlock } from "./MessageBlocks";
+import { RichMarkdown } from "./RichMarkdown";
 import { DELEGATION_NOTIFICATION_TYPE } from "shared";
 
 function formatTimestamp(ts: number): string {
@@ -509,7 +510,9 @@ function UserBubble({
                 )}
               </div>
             )}
-            <p className="text-base md:text-sm leading-relaxed whitespace-pre-wrap break-words break-word font-sans text-left text-foreground">{displayText}</p>
+            <div className="text-left">
+              <RichMarkdown content={displayText} />
+            </div>
             {msg.isError && (
               <div className="mt-1.5 text-xs text-error">Error sending message</div>
             )}
