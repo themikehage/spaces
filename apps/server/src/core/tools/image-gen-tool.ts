@@ -1,5 +1,5 @@
 import { existsSync, writeFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { generateImages } from "../../ai/vendor/ai/src/images.ts";
 import { getImageModel } from "../../ai/vendor/ai/src/image-models.ts";
 import { sessionManager } from "../session-manager";
@@ -114,14 +114,14 @@ export async function runImageGenModel(
     const arrayBuffer = await imgRes.arrayBuffer();
     const imageBuffer = Buffer.from(arrayBuffer);
 
-    const generatedDir = join(workspaceDir, "assets", "generated");
-    if (!existsSync(generatedDir)) {
-      mkdirSync(generatedDir, { recursive: true });
-    }
-
     const filename = `img_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.png`;
     const localPath = join("assets", "generated", filename);
     const fullPath = join(workspaceDir, localPath);
+
+    const generatedDir = dirname(fullPath);
+    if (!existsSync(generatedDir)) {
+      mkdirSync(generatedDir, { recursive: true });
+    }
 
     writeFileSync(fullPath, imageBuffer);
     return localPath;
@@ -159,14 +159,14 @@ export async function runImageGenModel(
     throw new Error("No image was returned by the provider.");
   }
 
-  const generatedDir = join(workspaceDir, "assets", "generated");
-  if (!existsSync(generatedDir)) {
-    mkdirSync(generatedDir, { recursive: true });
-  }
-
   const filename = `img_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.png`;
   const localPath = join("assets", "generated", filename);
   const fullPath = join(workspaceDir, localPath);
+
+  const generatedDir = dirname(fullPath);
+  if (!existsSync(generatedDir)) {
+    mkdirSync(generatedDir, { recursive: true });
+  }
 
   const imageBuffer = Buffer.from(imagePart.data, "base64");
   writeFileSync(fullPath, imageBuffer);

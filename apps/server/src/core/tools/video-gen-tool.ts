@@ -1,5 +1,5 @@
 import { existsSync, writeFileSync, mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { join, dirname } from "node:path";
 import { sessionManager } from "../session-manager";
 
 export async function runVideoGenModel(
@@ -14,14 +14,14 @@ export async function runVideoGenModel(
   const userEnv = sessionManager.userConfig.getUserEnv(username);
   const { authStorage } = sessionManager.userConfig.getUserContext(username);
 
-  const generatedDir = join(workspaceDir, "assets", "generated");
-  if (!existsSync(generatedDir)) {
-    mkdirSync(generatedDir, { recursive: true });
-  }
-
   const filename = `vid_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.mp4`;
   const localPath = join("assets", "generated", filename);
   const fullPath = join(workspaceDir, localPath);
+
+  const generatedDir = dirname(fullPath);
+  if (!existsSync(generatedDir)) {
+    mkdirSync(generatedDir, { recursive: true });
+  }
 
   if (isQwen) {
     const apiKey = authStorage.getApiKey("qwen") || userEnv.DASHSCOPE_API_KEY || process.env.DASHSCOPE_API_KEY || "";

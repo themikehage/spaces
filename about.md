@@ -24,7 +24,7 @@ El repositorio es un monorepo con workspaces de `pnpm`:
 
 El punto de entrada está en `apps/server/src/index.ts`. Las rutas se agrupan bajo `/api`; entre ellas se incluyen autenticación, sesiones, archivos, modelos, proveedores, agentes, equipos, preview, backup, logs, MCP, ajustes, galería, factory y aprobaciones.
 
-La configuración y las credenciales por usuario se almacenan localmente. Los secretos de proveedores se cifran antes de persistirse. El servidor también inicia la infraestructura de preview y realiza limpieza periódica de sesiones.
+La configuración y las credenciales por usuario se almacenan localmente. Los secretos de proveedores se cifran antes de persistirse. El servidor también inicia la infraestructura de preview, realiza limpieza periódica de sesiones e inyecta la herramienta nativa `manage_preview` en las sesiones de los agentes para darles control y visibilidad en tiempo real sobre la previsualización del proyecto.
 
 ## Decisiones técnicas
 

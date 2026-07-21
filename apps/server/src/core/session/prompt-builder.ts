@@ -65,6 +65,10 @@ export class SessionPromptBuilder {
           const projectJsonPath = join(projectDir, "project.json");
           if (existsSync(projectJsonPath)) {
             const projectMeta = JSON.parse(readFileSync(projectJsonPath, "utf-8"));
+            const { getPreviewState } = await import("../preview-watcher");
+            const previewState = getPreviewState(username, projectMeta.name);
+            const previewUrl = `/api/preview/${encodeURIComponent(username)}/${encodeURIComponent(projectMeta.name)}/index.html`;
+
             appendPrompts.push(
               `\n\n## Project Context\n` +
               `You are working inside a project workspace. Here is the project metadata:\n` +
@@ -72,7 +76,17 @@ export class SessionPromptBuilder {
               `- **Project Name**: ${projectMeta.name}\n` +
               `- **Workspace Path**: ${join(projectDir, "workspace")}\n` +
               (projectMeta.cloneUrl ? `- **Clone URL**: ${projectMeta.cloneUrl}\n` : "") +
-              `\nAll your file operations are sandboxed to the workspace path above. Do NOT attempt to navigate outside it with relative paths like \`..\`.`
+              `\nAll your file operations are sandboxed to the workspace path above. Do NOT attempt to navigate outside it with relative paths like \`..\`.\n\n` +
+              `## Project Preview & Build Capabilities\n` +
+              `This workspace has an integrated real-time preview server and build watcher.\n` +
+              `Current Preview Configuration:\n` +
+              `- **Framework Preset**: ${previewState.config?.framework || "auto"}\n` +
+              `- **Build Command**: ${previewState.config?.buildCommand || "None (or npm run build auto-fallback)"}\n` +
+              `- **Output Directory**: ${previewState.config?.outputDir || "dist"}\n` +
+              `- **Status**: ${previewState.status} (distExists: ${previewState.distExists}, indexHtmlExists: ${previewState.indexHtmlExists})\n` +
+              `- **Preview URL**: ${previewUrl}\n\n` +
+              `You have a dedicated tool to interact with the preview system: \`manage_preview\` (supporting actions 'status', 'configure', 'build', and 'abort').\n` +
+              `Always run a build using \`manage_preview(action: "build")\` rather than manual bash scripts when you modify frontend assets (e.g. React/Vite/Next.js/Astro) so that the user's browser updates in real time, and logs are displayed in the workspace UI.`
             );
           }
         }

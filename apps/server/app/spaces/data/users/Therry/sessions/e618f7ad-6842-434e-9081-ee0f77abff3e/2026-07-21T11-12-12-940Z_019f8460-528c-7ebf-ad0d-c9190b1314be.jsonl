@@ -1,5 +1,0 @@
-{"type":"session","version":3,"id":"019f8460-528c-7ebf-ad0d-c9190b1314be","timestamp":"2026-07-21T11:12:12.940Z","cwd":"C:\\Users\\themi\\AgentWorkspace\\openai-hack\\apps\\server\\app\\spaces\\data\\users\\Therry\\sessions\\e618f7ad-6842-434e-9081-ee0f77abff3e"}
-{"type":"model_change","id":"0ebfad79","parentId":null,"timestamp":"2026-07-21T11:12:50.610Z","provider":"opencode-go","modelId":"minimax-m3"}
-{"type":"thinking_level_change","id":"e4ddf289","parentId":"0ebfad79","timestamp":"2026-07-21T11:12:50.613Z","thinkingLevel":"medium"}
-{"type":"model_change","id":"55b183a9","parentId":"e4ddf289","timestamp":"2026-07-21T11:12:56.487Z","provider":"opencode-go","modelId":"deepseek-v4-flash"}
-{"type":"thinking_level_change","id":"d6a6d4fc","parentId":"55b183a9","timestamp":"2026-07-21T11:12:56.488Z","thinkingLevel":"medium"}

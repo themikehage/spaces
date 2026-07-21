@@ -12,7 +12,7 @@
 ## Próximo sprint: estabilización y calidad
 
 - [x] Actualizar la documentación de producto y del estado real del repositorio.
-- [ ] Ejecutar y registrar una verificación completa de `pnpm build`.
+- [x] Ejecutar y registrar una verificación completa de `pnpm build`.
 - [ ] Definir comandos estándar para typecheck, lint y pruebas en todos los workspaces.
 - [ ] Añadir pruebas de integración para rutas críticas: autenticación, sesiones, archivos y WebSocket.
 - [ ] Ampliar las pruebas de la orquestación de agentes, equipos y aprobaciones.

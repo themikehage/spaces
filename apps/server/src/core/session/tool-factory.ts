@@ -77,6 +77,16 @@ export class SessionToolFactory {
     const { getTeamWorkspaceDir } = require("shared");
     const meta = sessionManager.metadataStore.getSessionMetadata(username, sessionId);
     const teamId = meta?.teamId;
+    const projectId = meta?.projectId ?? meta?.projectName;
+    let previewTools: any[] = [];
+    if (projectId) {
+      try {
+        const { createPreviewTools } = require("../tools/preview-tools");
+        previewTools = createPreviewTools(username, projectId);
+      } catch (e) {
+        console.error("[SessionToolFactory] Failed to create preview tools:", e);
+      }
+    }
     let inheritedWorkspaceDir: string | undefined;
     let permittedAgentIds: Set<string> | undefined;
 
@@ -161,6 +171,7 @@ export class SessionToolFactory {
       exaSearchTool as any,
       webFetchTool as any,
       ...memoryTools as any,
+      ...previewTools as any,
     ];
 
     return {
