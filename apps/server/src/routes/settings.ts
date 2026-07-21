@@ -62,6 +62,7 @@ settingsRouter.get("/", (c) => {
     factoryName: settings.factoryName ?? "Spaces",
     factoryAvatarUrl: settings.factoryAvatarUrl ?? null,
     factorySystemPrompt: settings.factorySystemPrompt ?? "",
+    previewBaseUrl: process.env.PREVIEW_BASE_URL ?? null,
   });
 });
 

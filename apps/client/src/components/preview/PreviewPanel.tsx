@@ -25,6 +25,16 @@ const FRAMEWORK_LABELS: Record<string, string> = {
 function usePreviewStatus(projectName: string) {
   const [state, setState] = useState<PreviewState | null>(null);
   const [buildLogs, setBuildLogs] = useState<string[]>([]);
+  const [previewBaseUrl, setPreviewBaseUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    apiFetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.previewBaseUrl) setPreviewBaseUrl(data.previewBaseUrl);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!projectName) return;
@@ -73,14 +83,14 @@ function usePreviewStatus(projectName: string) {
     };
   }, [projectName]);
 
-  return { state, buildLogs, setBuildLogs, fetchConfig };
+  return { state, buildLogs, setBuildLogs, fetchConfig, previewBaseUrl };
 }
 
 export function PreviewPanel({ activeProjectName }: Props) {
 const l = useLiterals(u);
   const projectName = activeProjectName || "";
   const { user } = useAuth();
-  const { state: previewState, buildLogs, setBuildLogs, fetchConfig } = usePreviewStatus(projectName);
+  const { state: previewState, buildLogs, setBuildLogs, fetchConfig, previewBaseUrl: runtimePreviewBase } = usePreviewStatus(projectName);
   const [buildKey, setBuildKey] = useState(0);
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [configOpen, setConfigOpen] = useState(false);
@@ -99,10 +109,10 @@ const l = useLiterals(u);
     }
   }, [buildLogs, logOpen]);
 
-  // Use dedicated preview server (port 3001) for complete origin isolation.
-  // The preview server is separate from the main Hono server, so no catch-all
-  // SPA fallback can intercept preview asset requests.
+  // Use server-provided PREVIEW_BASE_URL if available (set via env var in production).
+  // Falls back to port 3001 for local development.
   const PREVIEW_BASE =
+    runtimePreviewBase ||
     (import.meta.env.VITE_PREVIEW_BASE_URL as string | undefined) ||
     `${window.location.protocol}//${window.location.hostname}:3001`;
 
