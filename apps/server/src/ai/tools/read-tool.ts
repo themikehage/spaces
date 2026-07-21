@@ -3,7 +3,7 @@ import { constants } from "node:fs";
 import { resolveSafePath } from "./path-safety";
 import { truncateHead } from "../vendor/agent/src/harness/utils/truncate";
 
-export function createReadToolDefinition(cwd: string) {
+export function createReadToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "read",
     description: "Read the contents of a text file. Supports offset and limit parameters for paginating large files.",
@@ -23,7 +23,7 @@ export function createReadToolDefinition(cwd: string) {
         throw new Error("Operation aborted");
       }
 
-      const absolutePath = resolveSafePath(cwd, filePath);
+      const absolutePath = resolveSafePath(cwd, filePath, allowedDirs);
 
       await access(absolutePath, constants.R_OK);
 

@@ -12,7 +12,7 @@ import {
   Edit
 } from "./edit-diff";
 
-export function createEditToolDefinition(cwd: string) {
+export function createEditToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "edit",
     description: "Edit a single text file using exact text block replacements. Multiple disjoint replacements can be executed in one call.",
@@ -46,7 +46,7 @@ export function createEditToolDefinition(cwd: string) {
         throw new Error("Operation aborted");
       }
 
-      const absolutePath = resolveSafePath(cwd, filePath);
+      const absolutePath = resolveSafePath(cwd, filePath, allowedDirs);
 
       await access(absolutePath, constants.R_OK | constants.W_OK);
 

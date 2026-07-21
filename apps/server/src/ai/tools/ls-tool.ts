@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { resolveSafePath } from "./path-safety";
 import { truncateHead } from "../vendor/agent/src/harness/utils/truncate";
 
-export function createLsToolDefinition(cwd: string) {
+export function createLsToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "ls",
     description: "List directory contents. Returns entries sorted alphabetically, with '/' suffix for directories. Includes dotfiles.",
@@ -22,7 +22,7 @@ export function createLsToolDefinition(cwd: string) {
         throw new Error("Operation aborted");
       }
 
-      const absolutePath = resolveSafePath(cwd, dirPath || ".");
+      const absolutePath = resolveSafePath(cwd, dirPath || ".", allowedDirs);
 
       const pathStat = await stat(absolutePath);
       if (!pathStat.isDirectory()) {

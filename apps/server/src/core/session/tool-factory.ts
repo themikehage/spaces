@@ -121,12 +121,14 @@ export class SessionToolFactory {
     const userEnv = userConfigManager.getUserEnv(username);
     const hasExaKey = !!(userEnv.EXA_API_KEY || process.env.EXA_API_KEY);
 
-    const readTool = createReadToolDefinition(workspaceDir);
-    const writeTool = createWriteToolDefinition(workspaceDir);
-    const editTool = createEditToolDefinition(workspaceDir);
-    const grepTool = createGrepToolDefinition(workspaceDir);
-    const findTool = createFindToolDefinition(workspaceDir);
-    const lsTool = createLsToolDefinition(workspaceDir);
+    const allowedDirs = resourceLoader ? resourceLoader.getSkills().skills.map((s: any) => s.baseDir) : [];
+
+    const readTool = createReadToolDefinition(workspaceDir, allowedDirs);
+    const writeTool = createWriteToolDefinition(workspaceDir, allowedDirs);
+    const editTool = createEditToolDefinition(workspaceDir, allowedDirs);
+    const grepTool = createGrepToolDefinition(workspaceDir, allowedDirs);
+    const findTool = createFindToolDefinition(workspaceDir, allowedDirs);
+    const lsTool = createLsToolDefinition(workspaceDir, allowedDirs);
 
     const factoryTool = createFactoryTool({
       username,

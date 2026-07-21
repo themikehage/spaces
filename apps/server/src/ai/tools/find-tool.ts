@@ -20,7 +20,7 @@ function globToRegex(glob: string): RegExp {
   return new RegExp(regexStr, "i");
 }
 
-export function createFindToolDefinition(cwd: string) {
+export function createFindToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "find",
     description: "Search for files by glob pattern. Returns matching file paths relative to the search directory. Respects .gitignore.",
@@ -36,7 +36,7 @@ export function createFindToolDefinition(cwd: string) {
     execute: async (toolCallId: string, args: any, signal?: AbortSignal) => {
       const { pattern, path: searchDir, limit } = args;
       const effectiveLimit = limit && limit > 0 ? limit : 1000;
-      const searchPath = resolveSafePath(cwd, searchDir || ".");
+      const searchPath = resolveSafePath(cwd, searchDir || ".", allowedDirs);
 
       if (signal?.aborted) {
         throw new Error("Operation aborted");

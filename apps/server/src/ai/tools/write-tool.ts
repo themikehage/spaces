@@ -2,7 +2,7 @@ import { writeFile, mkdir } from "node:fs/promises";
 import { dirname } from "node:path";
 import { resolveSafePath } from "./path-safety";
 
-export function createWriteToolDefinition(cwd: string) {
+export function createWriteToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "write",
     description: "Write content to a file. Creates the file if it doesn't exist, and overwrites it if it does. Automatically creates parent directories.",
@@ -21,7 +21,7 @@ export function createWriteToolDefinition(cwd: string) {
         throw new Error("Operation aborted");
       }
 
-      const absolutePath = resolveSafePath(cwd, filePath);
+      const absolutePath = resolveSafePath(cwd, filePath, allowedDirs);
       const parentDir = dirname(absolutePath);
 
       // Create parent directories recursively

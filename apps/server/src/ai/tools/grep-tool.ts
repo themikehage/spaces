@@ -20,7 +20,7 @@ function globToRegex(glob: string): RegExp {
   return new RegExp(regexStr, "i");
 }
 
-export function createGrepToolDefinition(cwd: string) {
+export function createGrepToolDefinition(cwd: string, allowedDirs?: string[]) {
   return {
     name: "grep",
     description: "Search file contents for a pattern. Returns matching lines with file paths and line numbers. Respects .gitignore.",
@@ -39,7 +39,7 @@ export function createGrepToolDefinition(cwd: string) {
     execute: async (toolCallId: string, args: any, signal?: AbortSignal) => {
       const { pattern, path: searchDir, glob: globPattern, ignoreCase, literal, limit } = args;
       const effectiveLimit = limit && limit > 0 ? limit : 100;
-      const searchPath = resolveSafePath(cwd, searchDir || ".");
+      const searchPath = resolveSafePath(cwd, searchDir || ".", allowedDirs);
 
       if (signal?.aborted) {
         throw new Error("Operation aborted");
